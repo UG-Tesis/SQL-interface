@@ -9,6 +9,7 @@ interface MainLayoutProps {
   sections: Section[];
   activeSection: SectionId | null;
   onNavigate: (id: SectionId) => void;
+  onNavigateToDashboard: () => void;
 }
 
 export function MainLayout({
@@ -16,6 +17,7 @@ export function MainLayout({
   sections,
   activeSection,
   onNavigate,
+  onNavigateToDashboard,
 }: MainLayoutProps) {
   const subNavItems = useSubNav(activeSection);
 
@@ -25,6 +27,7 @@ export function MainLayout({
         sections={sections}
         activeSection={activeSection}
         onNavigate={onNavigate}
+        onNavigateToDashboard={onNavigateToDashboard}
       />
       {activeSection && (
         <HoverSidebar key={activeSection} items={subNavItems} />

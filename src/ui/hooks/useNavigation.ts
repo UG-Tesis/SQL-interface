@@ -8,5 +8,9 @@ export function useNavigation(initial: SectionId | null = null) {
     setActiveSection(sectionId);
   };
 
-  return { activeSection, navigateTo };
+  const navigateToDashboard = () => {
+    setActiveSection(null);
+  };
+
+  return { activeSection, navigateTo, navigateToDashboard };
 }

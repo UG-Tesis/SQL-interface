@@ -4,12 +4,12 @@ import { FadeInUp } from '../components/FadeInUp';
 import { GradientTitle } from '../components/GradientTitle';
 import { SectionCard } from '../components/SectionCard';
 
-interface HomePageProps {
+interface DashboardPageProps {
   sections: Section[];
   onNavigate: (id: SectionId) => void;
 }
 
-export function HomePage({ sections, onNavigate }: HomePageProps) {
+export function DashboardPage({ sections, onNavigate }: DashboardPageProps) {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-8 py-8">
       <AnimatedBackdrop />
