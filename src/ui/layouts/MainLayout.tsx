@@ -8,7 +8,7 @@ import {
 } from 'react';
 import type { Section, SectionId } from '../../domain/models/Section';
 import { Header } from '../components/Header';
-import { HoverSidebar } from '../components/HoverSidebar';
+import { FixedSidebar } from '../components/FixedSidebar';
 import { useSubNav } from '../hooks/useSubNav';
 
 interface MainLayoutProps {
@@ -28,10 +28,53 @@ export function MainLayout({
 }: MainLayoutProps) {
   const subNavItems = useSubNav(activeSection);
   const [activeSubNavId, setActiveSubNavId] = useState<string | null>(null);
+  const [mobileSubNavOpen, setMobileSubNavOpen] = useState(false);
 
   useEffect(() => {
     setActiveSubNavId(subNavItems[0]?.id ?? null);
   }, [activeSection, subNavItems]);
+
+  useEffect(() => {
+    if (!mobileSubNavOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileSubNavOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [mobileSubNavOpen]);
+
+  useEffect(() => {
+    if (!mobileSubNavOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileSubNavOpen]);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const onChange = () => {
+      if (mq.matches) setMobileSubNavOpen(false);
+    };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  const handleSubNavChange = (id: string) => {
+    setActiveSubNavId(id);
+    setMobileSubNavOpen(false);
+  };
+
+  const handleNavigate = (id: SectionId) => {
+    setMobileSubNavOpen(false);
+    onNavigate(id);
+  };
+
+  const handleNavigateToDashboard = () => {
+    setMobileSubNavOpen(false);
+    onNavigateToDashboard();
+  };
 
   const sectionPageProps =
     activeSection != null && isValidElement(children)
@@ -43,18 +86,23 @@ export function MainLayout({
       <Header
         sections={sections}
         activeSection={activeSection}
-        onNavigate={onNavigate}
-        onNavigateToDashboard={onNavigateToDashboard}
+        onNavigate={handleNavigate}
+        onNavigateToDashboard={handleNavigateToDashboard}
+        showModuleSubNavTrigger={Boolean(activeSection)}
+        moduleSubNavOpen={mobileSubNavOpen}
+        onModuleSubNavTriggerClick={() => setMobileSubNavOpen((o) => !o)}
       />
       {activeSection && (
-        <HoverSidebar
+        <FixedSidebar
           key={activeSection}
           items={subNavItems}
           activeId={activeSubNavId}
-          onActiveIdChange={setActiveSubNavId}
+          onActiveIdChange={handleSubNavChange}
+          mobileOpen={mobileSubNavOpen}
+          onMobileOpenChange={setMobileSubNavOpen}
         />
       )}
-      <main className="flex flex-1 flex-col">
+      <main className={`flex flex-1 flex-col ${activeSection ? 'md:pl-72' : ''}`}>
         {isValidElement(children)
           ? cloneElement(children as ReactElement<Record<string, unknown>>, sectionPageProps)
           : children}
