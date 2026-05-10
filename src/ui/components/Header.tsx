@@ -21,7 +21,7 @@ export function Header({
   onModuleSubNavTriggerClick,
 }: HeaderProps) {
   return (
-    <header className="relative flex h-16 min-w-0 shrink-0 items-center border-b border-slate-800/80 bg-slate-900 px-3 text-white shadow-sm shadow-black/20 sm:px-5 md:gap-4 md:px-8">
+    <header className="fixed inset-x-0 top-0 z-[50] flex h-16 min-w-0 shrink-0 items-center border-b border-slate-800/80 bg-slate-900 px-3 text-white shadow-sm shadow-black/20 sm:px-5 md:gap-4 md:px-8">
       <div className="relative z-20 flex shrink-0 items-center gap-1.5">
         {showModuleSubNavTrigger ? (
           <button

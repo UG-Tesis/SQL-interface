@@ -102,7 +102,9 @@ export function MainLayout({
           onMobileOpenChange={setMobileSubNavOpen}
         />
       )}
-      <main className={`flex flex-1 flex-col ${activeSection ? 'md:pl-72' : ''}`}>
+      <main
+        className={`flex min-h-0 flex-1 flex-col pt-16 ${activeSection ? 'md:pl-72' : ''}`}
+      >
         {isValidElement(children)
           ? cloneElement(children as ReactElement<Record<string, unknown>>, sectionPageProps)
           : children}

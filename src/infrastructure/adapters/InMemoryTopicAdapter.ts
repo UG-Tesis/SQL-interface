@@ -7,26 +7,15 @@ const TOPICS: Topic[] = [
     id: 'c1',
     sectionId: 'curso',
     title: 'Lenguaje de Definición y Control de Datos',
-    description: 'DDL y DCL: definición de objetos y permisos en el servidor de datos.',
-    content: `Data Definition Language (DDL)
-CREATE
-ALTER
-DROP
-TRUNCATE
-
-Data Control Language (DCL)
-GRANT
-REVOKE`,
+    description: '',
+    content: '',
   },
   {
     id: 'c2',
     sectionId: 'curso',
     title: 'Lenguaje de Manipulación de Datos',
-    description: 'DML: inserción, actualización y eliminación de filas.',
-    content: `Data Manipulation Language (DML)
-INSERT
-UPDATE
-DELETE`,
+    description: '',
+    content: '',
   },
   {
     id: 'c3',
