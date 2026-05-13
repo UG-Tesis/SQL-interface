@@ -1,5 +1,6 @@
 import type { SubNavItem } from '../../domain/models/SubNavItem';
 import { FadeInUp } from './FadeInUp';
+import { ThemeToggle } from './ThemeToggle';
 
 interface FixedSidebarProps {
   items: SubNavItem[];
@@ -40,16 +41,19 @@ export function FixedSidebar({
       >
         <div className="flex items-center justify-between gap-2 border-b border-white/10 px-3 py-3 md:hidden">
           <p className="text-xs font-semibold uppercase tracking-wider text-cyan-200/90">Contenido</p>
-          <button
-            type="button"
-            onClick={() => onMobileOpenChange(false)}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
-            aria-label="Cerrar panel"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
+          <div className="flex shrink-0 items-center gap-0.5">
+            <ThemeToggle className="text-slate-200 hover:bg-white/10 hover:text-white focus-visible:ring-cyan-400" />
+            <button
+              type="button"
+              onClick={() => onMobileOpenChange(false)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+              aria-label="Cerrar panel"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className="px-3 py-5 md:px-4">

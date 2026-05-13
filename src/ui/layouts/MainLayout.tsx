@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { Section, SectionId } from '../../domain/models/Section';
-import { Header } from '../components/Header';
+import { SiteHeader } from '../components/SiteHeader';
 import { FixedSidebar } from '../components/FixedSidebar';
 import { useSubNav } from '../hooks/useSubNav';
 
@@ -108,11 +108,12 @@ export function MainLayout({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header
+      <SiteHeader
+        variant="app"
         sections={sections}
         activeSection={activeSection}
         onNavigate={handleNavigate}
-        onNavigateToDashboard={handleNavigateToDashboard}
+        onBrandClick={handleNavigateToDashboard}
         showModuleSubNavTrigger={Boolean(activeSection)}
         moduleSubNavOpen={mobileSubNavOpen}
         onModuleSubNavTriggerClick={() => setMobileSubNavOpen((o) => !o)}

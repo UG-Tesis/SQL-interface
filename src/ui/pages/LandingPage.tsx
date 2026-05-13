@@ -1,12 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { FadeInUp } from '../components/FadeInUp';
 import { PageBackdrop } from '../components/PageBackdrop';
 import { SiteHeader } from '../components/SiteHeader';
 
-interface LandingPageProps {
-  onEnter: () => void;
-}
-
-export function LandingPage({ onEnter }: LandingPageProps) {
+export function LandingPage() {
+  const navigate = useNavigate();
   return (
     <div className="relative flex min-h-screen flex-col dark:bg-slate-950">
       <PageBackdrop />
@@ -28,7 +26,7 @@ export function LandingPage({ onEnter }: LandingPageProps) {
           <FadeInUp delayMs={280}>
             <button
               type="button"
-              onClick={onEnter}
+              onClick={() => void navigate('/inicio')}
               className="mt-10 inline-flex min-w-[10rem] items-center justify-center rounded-xl bg-cyan-600 px-8 py-3.5 text-base font-semibold text-white shadow-md shadow-cyan-600/25 transition hover:bg-cyan-500 hover:shadow-lg hover:shadow-cyan-600/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 active:translate-y-px"
             >
               Ingresar

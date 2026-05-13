@@ -1,41 +1,56 @@
+import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import type { SectionId } from './domain/models/Section';
+import { isSectionId } from './domain/models/Section';
 import { MainLayout } from './ui/layouts/MainLayout';
 import { DashboardPage } from './ui/pages/DashboardPage';
 import { LandingPage } from './ui/pages/LandingPage';
 import { SectionPage } from './ui/pages/SectionPage';
-import { useNavigation } from './ui/hooks/useNavigation';
 import { useSections } from './ui/hooks/useSections';
 import { useTopics } from './ui/hooks/useTopics';
-import { useState } from 'react';
 
-function App() {
-  const [hasEntered, setHasEntered] = useState(false);
-  const { activeSection, navigateTo, navigateToDashboard } = useNavigation();
+function DashboardRoute() {
   const { sections } = useSections();
-  const { topics } = useTopics(activeSection);
+  const navigate = useNavigate();
+  return (
+    <DashboardPage
+      sections={sections}
+      onNavigate={(id) => void navigate(`/${id}`)}
+      onNavigateToHome={() => void navigate('/inicio')}
+    />
+  );
+}
 
-  if (!hasEntered) {
-    return <LandingPage onEnter={() => setHasEntered(true)} />;
-  }
+function SectionRoute() {
+  const { sectionId } = useParams<{ sectionId: string }>();
+  const navigate = useNavigate();
+  const { sections } = useSections();
+  const active: SectionId | null = isSectionId(sectionId) ? sectionId : null;
+  const { topics } = useTopics(active);
 
-  if (!activeSection) {
-    return (
-      <DashboardPage
-        sections={sections}
-        onNavigate={navigateTo}
-        onNavigateToHome={navigateToDashboard}
-      />
-    );
+  if (!active) {
+    return <Navigate to="/inicio" replace />;
   }
 
   return (
     <MainLayout
       sections={sections}
-      activeSection={activeSection}
-      onNavigate={navigateTo}
-      onNavigateToDashboard={navigateToDashboard}
+      activeSection={active}
+      onNavigate={(id) => void navigate(`/${id}`)}
+      onNavigateToDashboard={() => void navigate('/inicio')}
     >
       <SectionPage topics={topics} />
     </MainLayout>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/inicio" element={<DashboardRoute />} />
+      <Route path="/:sectionId" element={<SectionRoute />} />
+      <Route path="*" element={<Navigate to="/inicio" replace />} />
+    </Routes>
   );
 }
 

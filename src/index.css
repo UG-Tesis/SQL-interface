@@ -35,7 +35,7 @@ body {
   color: #e2e8f0;
 }
 
-/* Animaciones UI (AnimatedBackdrop, FadeInUp, GradientTitle) */
+/* Animaciones UI (FadeInUp, blobs de PageBackdrop) */
 @keyframes anim-fade-up {
   from {
     opacity: 0;
