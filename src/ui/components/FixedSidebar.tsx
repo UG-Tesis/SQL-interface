@@ -1,6 +1,22 @@
+import { useEffect, useState } from 'react';
 import type { SubNavItem } from '../../domain/models/SubNavItem';
 import { FadeInUp } from './FadeInUp';
 import { ThemeToggle } from './ThemeToggle';
+
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia(query).matches : false,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const onChange = () => setMatches(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [query]);
+
+  return matches;
+}
 
 interface FixedSidebarProps {
   items: SubNavItem[];
@@ -20,6 +36,9 @@ export function FixedSidebar({
   onMobileOpenChange,
   desktopCollapsed = false,
 }: FixedSidebarProps) {
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const isVisible = isDesktop ? !desktopCollapsed : mobileOpen;
+
   return (
     <>
       {mobileOpen ? (
@@ -38,6 +57,8 @@ export function FixedSidebar({
         } ${desktopCollapsed ? 'md:pointer-events-none md:-translate-x-full md:opacity-0' : 'md:translate-x-0 md:opacity-100'}`}
         style={{ background: 'linear-gradient(180deg, var(--app-navy) 0%, var(--app-navy-mid) 55%, #0a1628 100%)' }}
         aria-label="Contenido del módulo"
+        aria-hidden={!isVisible}
+        inert={!isVisible}
       >
         <div className="flex items-center justify-between gap-2 border-b border-white/10 px-3 py-3 md:hidden">
           <p className="text-xs font-semibold uppercase tracking-wider text-cyan-200/90">Contenido</p>

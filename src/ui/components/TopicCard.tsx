@@ -1,49 +1,53 @@
 import type { Topic } from '../../domain/models/Topic';
+import { DclTopicBody } from './DclTopicBody';
 import { DdlTopicBody } from './DdlTopicBody';
 import { DmlTopicBody } from './DmlTopicBody';
 import { DqlTopicBody } from './DqlTopicBody';
-import { ModuleHeroDecoration } from './ModuleHeroDecoration';
+import { TopicArticle } from './TopicArticle';
 
 interface TopicCardProps {
   topic: Topic;
 }
 
+function topicBody(topic: Topic) {
+  if (topic.id === 'c2') return <DmlTopicBody />;
+  if (topic.id === 'c3') return <DqlTopicBody />;
+  if (topic.content) {
+    return (
+      <div className="text-sm leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">
+        {topic.content}
+      </div>
+    );
+  }
+  return null;
+}
+
 /**
- * Tarjeta de tema: cabecera con acento cyan, decoración y cuerpo tipo curso en línea.
+ * Tarjeta de tema: un article por bloque; el tema c1 muestra DDL y DCL por separado.
  */
 export function TopicCard({ topic }: TopicCardProps) {
-  return (
-    <article className="overflow-hidden rounded-2xl border border-slate-200/90 bg-[var(--app-surface-elevated)] shadow-[0_4px_24px_-4px_rgba(15,23,42,0.08),0_0_0_1px_rgba(255,255,255,0.8)_inset] dark:border-slate-700/90 dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.35)] dark:ring-1 dark:ring-inset dark:ring-slate-700/50">
-      <div className="relative border-b border-slate-100 bg-gradient-to-br from-white via-slate-50/50 to-cyan-50/20 px-5 py-6 dark:border-slate-700/80 dark:from-slate-900 dark:via-slate-900/90 dark:to-cyan-950/20 sm:px-7 sm:py-7">
-        <div className="relative z-10 flex flex-col gap-4 pr-0 md:flex-row md:items-start md:justify-between md:pr-36">
-          <div className="min-w-0 flex-1 text-left">
-            <h4 className="text-xl font-bold tracking-tight text-[var(--app-navy)] dark:text-slate-100 sm:text-2xl md:text-[1.65rem]">
-              {topic.title}
-            </h4>
-            <div className="mt-3 h-1 w-14 rounded-full bg-cyan-500 shadow-sm shadow-cyan-500/30" aria-hidden />
-            {topic.description ? (
-              <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-[0.9375rem]">
-                {topic.description}
-              </p>
-            ) : null}
-          </div>
-        </div>
-        <ModuleHeroDecoration className="pointer-events-none absolute right-2 top-2 hidden opacity-[0.92] md:right-6 md:top-6 md:block dark:opacity-75" />
-      </div>
-
-      <div className="border-t border-slate-100/80 bg-slate-50/30 px-5 py-6 dark:border-slate-700/80 dark:bg-slate-900/50 sm:px-7 sm:py-7">
-        {topic.id === 'c1' ? (
+  if (topic.id === 'c1') {
+    return (
+      <div className="space-y-6">
+        <TopicArticle
+          title="Lenguaje de Definición de Datos (DDL)"
+          description="Define y modifica la estructura de bases de datos, tablas e índices con CREATE, ALTER, DROP y TRUNCATE."
+        >
           <DdlTopicBody />
-        ) : topic.id === 'c2' ? (
-          <DmlTopicBody />
-        ) : topic.id === 'c3' ? (
-          <DqlTopicBody />
-        ) : topic.content ? (
-          <div className="text-sm leading-relaxed text-slate-700 whitespace-pre-line dark:text-slate-300">
-            {topic.content}
-          </div>
-        ) : null}
+        </TopicArticle>
+        <TopicArticle
+          title="Lenguaje de Control de Datos (DCL)"
+          description="Administra permisos sobre objetos y esquemas con GRANT y REVOKE."
+        >
+          <DclTopicBody />
+        </TopicArticle>
       </div>
-    </article>
+    );
+  }
+
+  return (
+    <TopicArticle title={topic.title} description={topic.description || undefined}>
+      {topicBody(topic)}
+    </TopicArticle>
   );
 }

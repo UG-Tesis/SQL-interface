@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
 
-type DdlCmd = 'CREATE' | 'ALTER' | 'DROP' | 'TRUNCATE';
+type DdlCmd = 'CREATE' | 'ALTER' | 'DROP';
+
+const DDL_COMMANDS: DdlCmd[] = ['CREATE', 'ALTER', 'DROP'];
 
 type ScenarioCard = {
   id: string;
@@ -27,12 +29,6 @@ const SCENARIOS: ScenarioCard[] = [
     situation:
       'El índice idx_temporal_nunca_usado solo ocupa espacio y quieres quitarlo del catálogo sin tocar las filas.',
   },
-  {
-    id: 'sc4',
-    cmd: 'TRUNCATE',
-    situation:
-      'Tienes una tabla staging_import que debe quedar vacía para la siguiente corrida ETL, pero conservando columnas e índices.',
-  },
 ];
 
 function shuffleInPlace<T>(items: readonly T[]): T[] {
@@ -48,14 +44,12 @@ const CMD_LABEL: Record<DdlCmd, string> = {
   CREATE: 'CREATE',
   ALTER: 'ALTER',
   DROP: 'DROP',
-  TRUNCATE: 'TRUNCATE',
 };
 
 const CMD_HINT: Record<DdlCmd, string> = {
   CREATE: 'Definir objeto nuevo',
   ALTER: 'Cambiar estructura existente',
   DROP: 'Eliminar objeto del catálogo',
-  TRUNCATE: 'Vaciar filas, mantener tabla',
 };
 
 function cmdButtonClass(cmd: DdlCmd, active: boolean, matched: boolean, wrong: boolean): string {
@@ -77,8 +71,6 @@ function cmdButtonClass(cmd: DdlCmd, active: boolean, matched: boolean, wrong: b
       return `${base} border-sky-400/80 bg-gradient-to-br from-white to-sky-50/90 text-sky-900 shadow-md shadow-sky-500/10 hover:border-sky-500 hover:shadow-sky-500/25`;
     case 'DROP':
       return `${base} border-rose-400/80 bg-gradient-to-br from-white to-rose-50/90 text-rose-900 shadow-md shadow-rose-500/10 hover:border-rose-500 hover:shadow-rose-500/25`;
-    case 'TRUNCATE':
-      return `${base} border-amber-400/80 bg-gradient-to-br from-white to-amber-50/90 text-amber-950 shadow-md shadow-amber-500/10 hover:border-amber-500 hover:shadow-amber-500/25`;
     default:
       return base;
   }
@@ -86,9 +78,7 @@ function cmdButtonClass(cmd: DdlCmd, active: boolean, matched: boolean, wrong: b
 
 export function DdlMatchGame() {
   const [leftOrder, setLeftOrder] = useState<ScenarioCard[]>(() => shuffleInPlace(SCENARIOS));
-  const [rightOrder, setRightOrder] = useState<DdlCmd[]>(() =>
-    shuffleInPlace(['CREATE', 'ALTER', 'DROP', 'TRUNCATE'] as DdlCmd[]),
-  );
+  const [rightOrder, setRightOrder] = useState<DdlCmd[]>(() => shuffleInPlace(DDL_COMMANDS));
   const [matchedIds, setMatchedIds] = useState<Set<string>>(() => new Set());
   const [matchedCmds, setMatchedCmds] = useState<Set<DdlCmd>>(() => new Set());
   const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null);
@@ -101,7 +91,7 @@ export function DdlMatchGame() {
 
   const reset = useCallback(() => {
     setLeftOrder(shuffleInPlace(SCENARIOS));
-    setRightOrder(shuffleInPlace(['CREATE', 'ALTER', 'DROP', 'TRUNCATE'] as DdlCmd[]));
+    setRightOrder(shuffleInPlace(DDL_COMMANDS));
     setMatchedIds(new Set());
     setMatchedCmds(new Set());
     setSelectedScenarioId(null);
@@ -365,10 +355,9 @@ export function DdlMatchGame() {
         <div className="mt-6 flex flex-col gap-4 border-t border-slate-200/80 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-xl text-[11px] leading-relaxed text-slate-600">
             <span className="font-bold text-cyan-700">Tip:</span>{' '}
-            <span className="rounded bg-slate-100 px-1 font-mono text-[10px] text-rose-800">DROP</span> quita el
-            objeto del catálogo;{' '}
-            <span className="rounded bg-slate-100 px-1 font-mono text-[10px] text-amber-900">TRUNCATE</span> vacía la
-            tabla y conserva la definición.
+            <span className="rounded bg-slate-100 px-1 font-mono text-[10px] text-rose-800">DROP</span> quita el objeto
+            del catálogo; <span className="rounded bg-slate-100 px-1 font-mono text-[10px] text-cyan-800">ALTER</span>{' '}
+            modifica la estructura sin eliminar la tabla completa.
           </p>
           <button
             type="button"

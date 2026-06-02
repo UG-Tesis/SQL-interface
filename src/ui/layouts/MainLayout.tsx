@@ -29,32 +29,28 @@ export function MainLayout({
   onNavigateToDashboard,
 }: MainLayoutProps) {
   const subNavItems = useSubNav(activeSection);
-  const [activeSubNavId, setActiveSubNavId] = useState<string | null>(null);
+  const [selectionBySection, setSelectionBySection] = useState<Partial<Record<SectionId, string>>>({});
   const [mobileSubNavOpen, setMobileSubNavOpen] = useState(false);
-  const [sidebarDesktopCollapsed, setSidebarDesktopCollapsed] = useState(false);
-  const [sidebarPrefsHydrated, setSidebarPrefsHydrated] = useState(false);
-
-  useEffect(() => {
-    setActiveSubNavId(subNavItems[0]?.id ?? null);
-  }, [activeSection, subNavItems]);
-
-  useEffect(() => {
+  const [sidebarDesktopCollapsed, setSidebarDesktopCollapsed] = useState(() => {
     try {
-      setSidebarDesktopCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1');
+      return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1';
     } catch {
-      /* ignore */
+      return false;
     }
-    setSidebarPrefsHydrated(true);
-  }, []);
+  });
+
+  const activeSubNavId =
+    activeSection != null
+      ? (selectionBySection[activeSection] ?? subNavItems[0]?.id ?? null)
+      : null;
 
   useEffect(() => {
-    if (!sidebarPrefsHydrated) return;
     try {
       localStorage.setItem(SIDEBAR_COLLAPSED_KEY, sidebarDesktopCollapsed ? '1' : '0');
     } catch {
       /* ignore */
     }
-  }, [sidebarDesktopCollapsed, sidebarPrefsHydrated]);
+  }, [sidebarDesktopCollapsed]);
 
   useEffect(() => {
     if (!mobileSubNavOpen) return;
@@ -84,7 +80,9 @@ export function MainLayout({
   }, []);
 
   const handleSubNavChange = (id: string) => {
-    setActiveSubNavId(id);
+    if (activeSection != null) {
+      setSelectionBySection((prev) => ({ ...prev, [activeSection]: id }));
+    }
     setMobileSubNavOpen(false);
   };
 
@@ -99,9 +97,7 @@ export function MainLayout({
   };
 
   const sectionPageProps =
-    activeSection != null && isValidElement(children)
-      ? { sectionId: activeSection, activeSubNavId }
-      : {};
+    activeSection != null && isValidElement(children) ? { activeSubNavId } : {};
 
   const showSidebar = Boolean(activeSection);
   const mainPadMd = showSidebar ? (sidebarDesktopCollapsed ? 'md:pl-6' : 'md:pl-72') : '';

@@ -1,3 +1,4 @@
+import type { SectionId } from '../../domain/models/Section';
 import type { Topic } from '../../domain/models/Topic';
 import type { TopicPort } from '../../domain/ports/TopicPort';
 
@@ -37,7 +38,7 @@ LIMIT
 Funciones y operaciones en SELECT
 Manipulación de texto: CONCAT, UPPER, LOWER, SUBSTRING
 Condicional: CASE WHEN
-Funciones de fecha: CURRENTDAY, NOW, DATEDIFF, AGE
+Funciones de fecha: CURRENT_DATE, NOW, DATEDIFF, TIMESTAMPDIFF
 Funciones de agregación: COUNT, SUM, AVG, MAX, MIN`,
   },
   {
@@ -48,7 +49,11 @@ Funciones de agregación: COUNT, SUM, AVG, MAX, MIN`,
     content: `Comandos del FROM (relación de tablas)
 JOIN
 INNER JOIN
-FULL OUTER JOIN
+LEFT JOIN
+RIGHT JOIN
+CROSS JOIN
+
+Combinación de resultados (operadores de conjunto)
 UNION
 UNION ALL
 
@@ -106,7 +111,7 @@ CREATE VIEW`,
 ];
 
 export class InMemoryTopicAdapter implements TopicPort {
-  getTopicsBySectionId(sectionId: string): Topic[] {
+  getTopicsBySectionId(sectionId: SectionId): Topic[] {
     return TOPICS.filter((t) => t.sectionId === sectionId);
   }
 

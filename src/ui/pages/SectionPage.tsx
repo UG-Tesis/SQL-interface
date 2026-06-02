@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import type { SectionId } from '../../domain/models/Section';
 import type { Topic } from '../../domain/models/Topic';
 import { FadeInUp } from '../components/FadeInUp';
 import { PageBackdrop } from '../components/PageBackdrop';
@@ -7,17 +6,16 @@ import { TopicCard } from '../components/TopicCard';
 
 interface SectionPageProps {
   topics: Topic[];
-  sectionId?: SectionId;
   activeSubNavId?: string | null;
 }
 
-export function SectionPage({ topics, sectionId, activeSubNavId }: SectionPageProps) {
+export function SectionPage({ topics, activeSubNavId }: SectionPageProps) {
   const visibleTopics = useMemo(() => {
-    if (sectionId !== 'curso') return topics;
-    const id = activeSubNavId ?? topics[0]?.id;
+    if (topics.length === 0) return [];
+    const id = activeSubNavId ?? topics[0].id;
     const match = topics.find((t) => t.id === id);
-    return match ? [match] : topics;
-  }, [sectionId, activeSubNavId, topics]);
+    return match ? [match] : [topics[0]];
+  }, [activeSubNavId, topics]);
 
   const wideCursoTopicIds = new Set(['c1', 'c2', 'c3']);
   const isCursoWideLayout =

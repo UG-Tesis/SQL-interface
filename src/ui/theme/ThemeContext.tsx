@@ -1,34 +1,10 @@
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
-
-export type ThemeMode = 'light' | 'dark';
-
-const STORAGE_KEY = 'sql-interface-theme';
-
-type ThemeContextValue = {
-  theme: ThemeMode;
-  toggleTheme: () => void;
-  setTheme: (mode: ThemeMode) => void;
-};
-
-const ThemeContext = createContext<ThemeContextValue | null>(null);
-
-function readStoredTheme(): ThemeMode {
-  try {
-    const v = localStorage.getItem(STORAGE_KEY);
-    if (v === 'dark' || v === 'light') return v;
-  } catch {
-    /* ignore */
-  }
-  return 'light';
-}
+  readStoredTheme,
+  STORAGE_KEY,
+  ThemeContext,
+  type ThemeMode,
+} from './theme-context';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeMode>(() =>
@@ -60,12 +36,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
-}
-
-export function useTheme() {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) {
-    throw new Error('useTheme debe usarse dentro de ThemeProvider');
-  }
-  return ctx;
 }

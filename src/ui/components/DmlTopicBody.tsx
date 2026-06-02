@@ -30,19 +30,19 @@ export function DmlTopicBody() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h4 className="text-sm font-semibold uppercase tracking-wide text-cyan-800">
+        <h4 className="text-sm font-semibold uppercase tracking-wide text-cyan-800 dark:text-cyan-300">
           Data Manipulation Language (DML)
         </h4>
         <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-          El <strong className="font-semibold text-slate-800">DML</strong> permite{' '}
-          <strong className="font-semibold text-slate-800">añadir, modificar y borrar filas</strong> dentro
+          El <strong className="font-semibold text-slate-800 dark:text-slate-100">DML</strong> permite{' '}
+          <strong className="font-semibold text-slate-800 dark:text-slate-100">añadir, modificar y borrar filas</strong> dentro
           de tablas ya existentes. Opera sobre los datos, no sobre la definición de la tabla (eso es DDL).
-          En <strong className="font-semibold text-slate-800">MySQL Workbench</strong> escribes las
+          En <strong className="font-semibold text-slate-800 dark:text-slate-100">MySQL Workbench</strong> escribes las
           sentencias en el editor SQL, eliges el esquema y ejecutas como en el resto del curso.
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-stretch lg:gap-x-6 lg:gap-y-6">
+      <div className="flex flex-col gap-6">
         <DmlSection
           command="INSERT"
           title="Insertar filas nuevas"
@@ -92,7 +92,7 @@ WHERE id_cliente = 99;
         />
       </div>
 
-      <div className="border-t border-cyan-100/80 pt-8">
+      <div className="border-t border-cyan-100/80 pt-8 dark:border-slate-700">
         <DmlPracticeGame />
       </div>
     </div>

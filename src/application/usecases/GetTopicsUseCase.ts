@@ -1,3 +1,4 @@
+import type { SectionId } from '../../domain/models/Section';
 import type { Topic } from '../../domain/models/Topic';
 import type { TopicPort } from '../../domain/ports/TopicPort';
 
@@ -8,7 +9,7 @@ export class GetTopicsUseCase {
     this.topicRepository = topicRepository;
   }
 
-  getBySectionId(sectionId: string): Topic[] {
+  getBySectionId(sectionId: SectionId): Topic[] {
     return this.topicRepository.getTopicsBySectionId(sectionId);
   }
 

@@ -1,4 +1,4 @@
-import { useTheme } from '../theme/ThemeContext';
+import { useTheme } from '../theme/useTheme';
 
 /**
  * Alterna modo claro / oscuro (persistido en localStorage).

@@ -29,16 +29,16 @@ export function DqlTopicBody() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h4 className="text-sm font-semibold uppercase tracking-wide text-cyan-800">
+        <h4 className="text-sm font-semibold uppercase tracking-wide text-cyan-800 dark:text-cyan-300">
           Data Query Language (DQL)
         </h4>
         <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-          El <strong className="font-semibold text-slate-800">DQL</strong> es el subconjunto de SQL dedicado a{' '}
-          <strong className="font-semibold text-slate-800">consultar y leer datos</strong> sin modificarlos.
-          La forma habitual es la sentencia <code className="rounded bg-slate-200/80 px-1 font-mono text-[11px]">SELECT</code>, que
-          indica qué columnas o expresiones mostrar; <code className="rounded bg-slate-200/80 px-1 font-mono text-[11px]">FROM</code>{' '}
-          indica de qué tabla (o tablas) provienen las filas; y <code className="rounded bg-slate-200/80 px-1 font-mono text-[11px]">WHERE</code>{' '}
-          filtra las filas que cumplen una condición. En <strong className="font-semibold text-slate-800">MySQL Workbench</strong> se
+          El <strong className="font-semibold text-slate-800 dark:text-slate-100">DQL</strong> es el subconjunto de SQL dedicado a{' '}
+          <strong className="font-semibold text-slate-800 dark:text-slate-100">consultar y leer datos</strong> sin modificarlos.
+          La forma habitual es la sentencia <code className="rounded bg-slate-200/80 px-1 font-mono text-[11px] dark:bg-slate-700 dark:text-slate-200">SELECT</code>, que
+          indica qué columnas o expresiones mostrar; <code className="rounded bg-slate-200/80 px-1 font-mono text-[11px] dark:bg-slate-700 dark:text-slate-200">FROM</code>{' '}
+          indica de qué tabla (o tablas) provienen las filas; y <code className="rounded bg-slate-200/80 px-1 font-mono text-[11px] dark:bg-slate-700 dark:text-slate-200">WHERE</code>{' '}
+          filtra las filas que cumplen una condición. En <strong className="font-semibold text-slate-800 dark:text-slate-100">MySQL Workbench</strong> se
           ejecuta igual que el resto del curso: eliges el esquema, escribes la consulta y ejecutas.
         </p>
       </header>
@@ -93,15 +93,15 @@ WHERE email LIKE '%@ejemplo.com'
         />
       </div>
 
-      <div className="border-t border-cyan-100/80 pt-8">
+      <div className="border-t border-cyan-100/80 pt-8 dark:border-slate-700">
         <header className="mb-6 space-y-2">
-          <h4 className="text-sm font-semibold uppercase tracking-wide text-cyan-800">
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-cyan-800 dark:text-cyan-300">
             Comandos básicos del SELECT
           </h4>
           <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-            Además de listar columnas tal cual en la tabla, el <strong className="font-semibold text-slate-800">SELECT</strong> permite
-            el comodín <strong className="font-semibold text-slate-800">*</strong>, elegir columnas concretas, renombrar resultados con{' '}
-            <strong className="font-semibold text-slate-800">AS</strong> y construir valores calculados con operadores aritméticos.
+            Además de listar columnas tal cual en la tabla, el <strong className="font-semibold text-slate-800 dark:text-slate-100">SELECT</strong> permite
+            el comodín <strong className="font-semibold text-slate-800 dark:text-slate-100">*</strong>, elegir columnas concretas, renombrar resultados con{' '}
+            <strong className="font-semibold text-slate-800 dark:text-slate-100">AS</strong> y construir valores calculados con operadores aritméticos.
           </p>
         </header>
 
