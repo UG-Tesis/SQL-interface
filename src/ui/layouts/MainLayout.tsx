@@ -2,16 +2,22 @@ import {
   cloneElement,
   isValidElement,
   useEffect,
+  useMemo,
+  useRef,
   useState,
   type ReactElement,
   type ReactNode,
 } from 'react';
 import type { Section, SectionId } from '../../domain/models/Section';
+import { CURSO_MODULE_DEFINITIONS } from '../../domain/config/cursoModules.config';
 import { SiteHeader } from '../components/SiteHeader';
 import { FixedSidebar } from '../components/FixedSidebar';
 import { useSubNav } from '../hooks/useSubNav';
+import { useActividadSubNav } from '../hooks/useActividadSubNav';
+import { useCursoProgress } from '../session/CursoProgressContext';
+import { APP_STORAGE_KEYS } from '../../infrastructure/storage/browserStorage';
 
-const SIDEBAR_COLLAPSED_KEY = 'sql-interface-sidebar-collapsed';
+const SIDEBAR_COLLAPSED_KEY = APP_STORAGE_KEYS.sidebarCollapsed;
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -29,6 +35,27 @@ export function MainLayout({
   onNavigateToDashboard,
 }: MainLayoutProps) {
   const subNavItems = useSubNav(activeSection);
+  const isActividadSection = activeSection === 'actividad';
+  const { items: actividadSubNavItems, firstItemId: firstActividadId } =
+    useActividadSubNav(isActividadSection);
+  const baseSubNavItems = isActividadSection ? actividadSubNavItems : subNavItems;
+  const { getModuleAccess, progress, completingTopicId } = useCursoProgress();
+  const prevCompletingTopicId = useRef<string | null>(null);
+  const enrichedSubNavItems = useMemo(
+    () =>
+      activeSection === 'curso'
+        ? baseSubNavItems.map((item) => {
+            const access = getModuleAccess(item.id);
+            return {
+              ...item,
+              enabled: access?.enabled ?? item.id === 'c1',
+              completed: access?.completed ?? false,
+              porcentaje: access?.porcentaje ?? 0,
+            };
+          })
+        : baseSubNavItems,
+    [activeSection, baseSubNavItems, getModuleAccess],
+  );
   const [selectionBySection, setSelectionBySection] = useState<Partial<Record<SectionId, string>>>({});
   const [mobileSubNavOpen, setMobileSubNavOpen] = useState(false);
   const [sidebarDesktopCollapsed, setSidebarDesktopCollapsed] = useState(() => {
@@ -41,8 +68,73 @@ export function MainLayout({
 
   const activeSubNavId =
     activeSection != null
-      ? (selectionBySection[activeSection] ?? subNavItems[0]?.id ?? null)
+      ? (selectionBySection[activeSection] ??
+        (isActividadSection ? firstActividadId : null) ??
+        enrichedSubNavItems.find((item) => item.enabled !== false)?.id ??
+        enrichedSubNavItems[0]?.id ??
+        null)
       : null;
+
+  useEffect(() => {
+    if (
+      isActividadSection &&
+      firstActividadId &&
+      !selectionBySection.actividad &&
+      actividadSubNavItems.length > 0
+    ) {
+      setSelectionBySection((prev) => ({ ...prev, actividad: firstActividadId }));
+    }
+  }, [isActividadSection, firstActividadId, actividadSubNavItems.length, selectionBySection.actividad]);
+
+  useEffect(() => {
+    if (!isActividadSection || enrichedSubNavItems.length === 0) return;
+
+    const currentId = selectionBySection.actividad ?? firstActividadId;
+    const currentItem = enrichedSubNavItems.find((item) => item.id === currentId);
+    if (currentItem?.enabled === false || currentItem?.isGroupHeader) {
+      const firstEnabled = enrichedSubNavItems.find(
+        (item) => !item.isGroupHeader && item.enabled !== false && !item.id.endsWith('-empty'),
+      );
+      if (firstEnabled) {
+        setSelectionBySection((prev) => ({ ...prev, actividad: firstEnabled.id }));
+      }
+    }
+  }, [isActividadSection, enrichedSubNavItems, selectionBySection.actividad, firstActividadId]);
+
+  useEffect(() => {
+    if (activeSection !== 'curso' || enrichedSubNavItems.length === 0) return;
+
+    const currentId = selectionBySection.curso ?? enrichedSubNavItems[0]?.id;
+    const currentItem = enrichedSubNavItems.find((item) => item.id === currentId);
+    if (currentItem?.enabled === false) {
+      const firstEnabled = enrichedSubNavItems.find((item) => item.enabled !== false);
+      if (firstEnabled) {
+        setSelectionBySection((prev) => ({ ...prev, curso: firstEnabled.id }));
+      }
+    }
+  }, [activeSection, enrichedSubNavItems, selectionBySection.curso]);
+
+  useEffect(() => {
+    if (activeSection !== 'curso' || !progress) return;
+
+    const justFinished = prevCompletingTopicId.current;
+    if (justFinished && !completingTopicId) {
+      const completedIndex = CURSO_MODULE_DEFINITIONS.findIndex(
+        (module) => module.topicId === justFinished,
+      );
+      const nextDefinition = CURSO_MODULE_DEFINITIONS[completedIndex + 1];
+      if (nextDefinition) {
+        const nextAccess = progress.modules.find(
+          (module) => module.topicId === nextDefinition.topicId,
+        );
+        if (nextAccess?.enabled) {
+          setSelectionBySection((prev) => ({ ...prev, curso: nextDefinition.topicId }));
+        }
+      }
+    }
+
+    prevCompletingTopicId.current = completingTopicId;
+  }, [activeSection, completingTopicId, progress]);
 
   useEffect(() => {
     try {
@@ -80,6 +172,16 @@ export function MainLayout({
   }, []);
 
   const handleSubNavChange = (id: string) => {
+    if (activeSection === 'curso') {
+      const target = enrichedSubNavItems.find((item) => item.id === id);
+      if (target?.enabled === false) return;
+    }
+    if (activeSection === 'actividad') {
+      const target = enrichedSubNavItems.find((item) => item.id === id);
+      if (target?.isGroupHeader || target?.enabled === false || target?.id.endsWith('-empty')) {
+        return;
+      }
+    }
     if (activeSection != null) {
       setSelectionBySection((prev) => ({ ...prev, [activeSection]: id }));
     }
@@ -97,7 +199,9 @@ export function MainLayout({
   };
 
   const sectionPageProps =
-    activeSection != null && isValidElement(children) ? { activeSubNavId } : {};
+    activeSection != null && isValidElement(children)
+      ? { activeSubNavId, sectionId: activeSection }
+      : {};
 
   const showSidebar = Boolean(activeSection);
   const mainPadMd = showSidebar ? (sidebarDesktopCollapsed ? 'md:pl-6' : 'md:pl-72') : '';
@@ -117,7 +221,7 @@ export function MainLayout({
       {showSidebar ? (
         <FixedSidebar
           key={activeSection}
-          items={subNavItems}
+          items={enrichedSubNavItems}
           activeId={activeSubNavId}
           onActiveIdChange={handleSubNavChange}
           mobileOpen={mobileSubNavOpen}

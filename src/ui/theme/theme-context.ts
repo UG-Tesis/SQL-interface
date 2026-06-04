@@ -1,8 +1,9 @@
 import { createContext } from 'react';
+import { APP_STORAGE_KEYS } from '../../infrastructure/storage/browserStorage';
 
 export type ThemeMode = 'light' | 'dark';
 
-export const STORAGE_KEY = 'sql-interface-theme';
+export const STORAGE_KEY = APP_STORAGE_KEYS.theme;
 
 export type ThemeContextValue = {
   theme: ThemeMode;

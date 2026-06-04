@@ -1,6 +1,10 @@
 import { render, screen } from '@testing-library/react';
+import type { ComponentProps } from 'react';
 import { describe, expect, it } from 'vitest';
 import type { Topic } from '../../domain/models/Topic';
+import { CursoProgressProvider } from '../session/CursoProgressContext';
+import { ActividadesCatalogProvider } from '../session/ActividadesCatalogContext';
+import { SessionProvider } from '../session/SessionContext';
 import { SectionPage } from './SectionPage';
 
 const sampleTopics: Topic[] = [
@@ -20,26 +24,46 @@ const sampleTopics: Topic[] = [
   },
 ];
 
+function renderSectionPage(props: ComponentProps<typeof SectionPage>) {
+  return render(
+    <SessionProvider>
+      <CursoProgressProvider>
+        <ActividadesCatalogProvider>
+          <SectionPage {...props} />
+        </ActividadesCatalogProvider>
+      </CursoProgressProvider>
+    </SessionProvider>,
+  );
+}
+
 describe('SectionPage', () => {
   it('muestra el primer tema cuando no hay subnavegación activa', () => {
-    render(<SectionPage topics={sampleTopics} />);
+    renderSectionPage({ sectionId: 'curso', topics: sampleTopics });
     expect(screen.getByText('Contenido del tema uno.')).toBeInTheDocument();
     expect(screen.queryByText('Contenido del tema dos.')).not.toBeInTheDocument();
   });
 
   it('muestra el tema indicado por activeSubNavId', () => {
-    render(<SectionPage topics={sampleTopics} activeSubNavId="tema-b" />);
+    renderSectionPage({
+      sectionId: 'curso',
+      topics: sampleTopics,
+      activeSubNavId: 'tema-b',
+    });
     expect(screen.getByText('Contenido del tema dos.')).toBeInTheDocument();
     expect(screen.queryByText('Contenido del tema uno.')).not.toBeInTheDocument();
   });
 
   it('vuelve al primer tema si activeSubNavId no existe en la lista', () => {
-    render(<SectionPage topics={sampleTopics} activeSubNavId="inexistente" />);
+    renderSectionPage({
+      sectionId: 'curso',
+      topics: sampleTopics,
+      activeSubNavId: 'inexistente',
+    });
     expect(screen.getByText('Contenido del tema uno.')).toBeInTheDocument();
   });
 
   it('informa cuando la sección no tiene temas', () => {
-    render(<SectionPage topics={[]} />);
+    renderSectionPage({ sectionId: 'curso', topics: [] });
     expect(screen.getByText(/no hay contenido disponible/i)).toBeInTheDocument();
   });
 });

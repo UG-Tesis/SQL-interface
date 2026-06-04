@@ -7,6 +7,15 @@ import { LandingPage } from './ui/pages/LandingPage';
 import { SectionPage } from './ui/pages/SectionPage';
 import { useSections } from './ui/hooks/useSections';
 import { useTopics } from './ui/hooks/useTopics';
+import { useSession } from './ui/session/SessionContext';
+
+function RequireSession({ children }: { children: React.ReactNode }) {
+  const { activeUser } = useSession();
+  if (!activeUser) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
 
 function DashboardRoute() {
   const { sections } = useSections();
@@ -38,7 +47,7 @@ function SectionRoute() {
       onNavigate={(id) => void navigate(`/${id}`)}
       onNavigateToDashboard={() => void navigate('/inicio')}
     >
-      <SectionPage topics={topics} />
+      <SectionPage sectionId={active} topics={topics} />
     </MainLayout>
   );
 }
@@ -47,9 +56,23 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
-      <Route path="/inicio" element={<DashboardRoute />} />
-      <Route path="/:sectionId" element={<SectionRoute />} />
-      <Route path="*" element={<Navigate to="/inicio" replace />} />
+      <Route
+        path="/inicio"
+        element={
+          <RequireSession>
+            <DashboardRoute />
+          </RequireSession>
+        }
+      />
+      <Route
+        path="/:sectionId"
+        element={
+          <RequireSession>
+            <SectionRoute />
+          </RequireSession>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
