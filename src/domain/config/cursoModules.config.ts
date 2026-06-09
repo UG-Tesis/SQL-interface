@@ -22,19 +22,19 @@ export const CURSO_MODULE_DEFINITIONS: CursoModuleDefinition[] = [
     topicId: 'c3',
     orden: 3,
     nombre: 'Lenguaje de Consulta de Datos – Nivel Básico',
-    descripcion: 'DQL: SELECT, FROM, WHERE y listado de datos.',
+    descripcion: 'DQL: SELECT, FROM, WHERE. Comandos básicos del SELECT: *, columnas específicas y operadores matemáticos.',
   },
   {
     topicId: 'c4',
     orden: 4,
     nombre: 'Lenguaje de Consulta de Datos – Nivel Avanzado',
-    descripcion: 'ORDER BY, GROUP BY, LIMIT y funciones en consultas.',
+    descripcion: 'DQL avanzado: ORDER BY, GROUP BY y LIMIT. Agregación: COUNT, SUM, AVG, MAX y MIN.',
   },
   {
     topicId: 'c5',
     orden: 5,
-    nombre: 'Lenguaje de Consulta de Datos – Uniones, Filtros y Vistas',
-    descripcion: 'JOIN, UNION, filtros avanzados y CREATE VIEW.',
+    nombre: 'Lenguaje de Consulta de Datos – Uniones y Filtros',
+    descripcion: 'FROM avanzado: JOIN. WHERE avanzado: =, <, >, !=, AND, OR, NOT, BETWEEN, IN y LIKE.',
   },
 ];
 

@@ -34,3 +34,4 @@ export function getActividadPracticeMode(
 }
 
 export const SANDBOX_DML_TABLE = 'practica_alumnos';
+export const SANDBOX_DQL_TABLE = 'practica_alumnos';

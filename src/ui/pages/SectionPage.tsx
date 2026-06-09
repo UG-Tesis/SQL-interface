@@ -44,7 +44,7 @@ export function SectionPage({ sectionId, topics, activeSubNavId }: SectionPagePr
     return match ? [match] : [topics[0]];
   }, [activeSubNavId, topics]);
 
-  const wideCursoTopicIds = new Set(['c1', 'c2', 'c3']);
+  const wideCursoTopicIds = new Set(['c1', 'c2', 'c3', 'c4', 'c5']);
   const isCursoWideLayout =
     sectionId === 'curso' &&
     visibleTopics.length === 1 &&

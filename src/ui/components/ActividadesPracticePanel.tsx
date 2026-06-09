@@ -3,6 +3,7 @@ import {
   getActividadPracticeMode,
   parseActividadSubNavId,
   SANDBOX_DML_TABLE,
+  SANDBOX_DQL_TABLE,
 } from '../../domain/config/actividades.config';
 import type { SqlExecutionResult } from '../../domain/models/SqlExecutionResult';
 import type { SqlValidationResult } from '../../domain/models/SqlValidationResult';
@@ -108,6 +109,9 @@ export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPractice
   const practiceMode = activeEntry
     ? getActividadPracticeMode(activeEntry.moduloOrden, activeEntry.orden)
     : 'validate_only';
+
+  const sandboxTable =
+    activeEntry && activeEntry.moduloOrden >= 3 ? SANDBOX_DQL_TABLE : SANDBOX_DML_TABLE;
 
   const handleValidateQuery = async () => {
     const statement = sql.trim();
@@ -291,7 +295,7 @@ export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPractice
             <div className="border-b border-slate-800 bg-slate-900/80 px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-slate-500">
               {practiceMode === 'validate_only'
                 ? 'Validación sin ejecutar en la base de datos'
-                : `Consulta SQL · tesis_sandbox · tabla ${SANDBOX_DML_TABLE}`}
+                : `Consulta SQL · tesis_sandbox · tabla ${sandboxTable}`}
             </div>
             <textarea
               value={sql}

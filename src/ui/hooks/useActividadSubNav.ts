@@ -29,6 +29,7 @@ export function useActividadSubNav(enabled: boolean) {
             ? 'Sin actividades registradas'
             : 'Disponible al completar el módulo anterior',
           enabled: false,
+          moduleGroupId: moduloActividadHeaderId(group.topicId),
         });
         continue;
       }
@@ -39,6 +40,7 @@ export function useActividadSubNav(enabled: boolean) {
           label: actividad.nombre,
           enabled: group.enabled,
           completed: isActividadFinalized(actividad.id),
+          moduleGroupId: moduloActividadHeaderId(group.topicId),
         });
       }
     }

@@ -47,7 +47,7 @@ export function DqlTopicBody() {
         <DqlSection
           command="SELECT"
           title="Qué columnas o expresiones devolver"
-          definition="Lista las columnas que quieres ver, expresiones calculadas o funciones aplicadas a los datos. El resultado es un conjunto de filas (result set) con tantas columnas como expresiones indiques en la lista."
+          definition="Lista las columnas que quieres ver o expresiones calculadas con operadores aritméticos. El resultado es un conjunto de filas (result set) con tantas columnas como expresiones indiques en la lista."
           example={`USE tienda_curso;
 
 -- Todas las columnas de la tabla cliente
@@ -62,34 +62,38 @@ FROM cliente;`}
         <DqlSection
           command="FROM"
           title="De dónde salen las filas"
-          definition="Indica la tabla (o, en temas avanzados, varias tablas unidas) sobre la que se evalúa la consulta. Sin FROM válido no hay filas que recorrer; es el origen del dataset antes de filtrar con WHERE."
+          definition="Indica la tabla sobre la que se ejecuta la consulta. SELECT dice qué columnas quieres ver; FROM dice en qué tabla están esas columnas. Si la tabla no existe o el nombre está mal escrito, MySQL devuelve un error. Sin FROM no hay filas que leer. En módulos posteriores verás cómo combinar varias tablas; aquí basta con indicar una."
           example={`USE tienda_curso;
 
--- Mínimo habitual: una tabla en FROM
+-- Leer columnas de la tabla cliente
 SELECT id_cliente, nombre
 FROM cliente;
 
--- Alias de tabla: útil en consultas más largas (c = cliente)
-SELECT c.nombre, c.email
-FROM cliente AS c;`}
+-- Cambiar la tabla en FROM cambia el origen de los datos
+SELECT id_producto, nombre, precio
+FROM producto;
+
+-- FROM va después de SELECT y antes de WHERE (si lo usas)
+SELECT nombre, email
+FROM cliente
+WHERE id_cliente = 1;`}
         />
 
         <DqlSection
           command="WHERE"
           title="Filtrar filas por condición"
-          definition="Solo se devuelven las filas que cumplen la condición booleana. Combina comparaciones (=, menor que, mayor que, distinto, etc.) y operadores lógicos (AND, OR, NOT). Sin WHERE, se consideran todas las filas de la tabla indicada en FROM."
+          definition="Solo se devuelven las filas que cumplen la condición indicada. Puedes usar comparaciones simples (=, menor que, mayor que, distinto, etc.). Sin WHERE, se consideran todas las filas de la tabla indicada en FROM."
           example={`USE tienda_curso;
 
--- Un criterio
+-- Igualdad
 SELECT nombre, email
 FROM cliente
 WHERE id_cliente = 1;
 
--- Varios criterios a la vez
-SELECT nombre, telefono
-FROM cliente
-WHERE email LIKE '%@ejemplo.com'
-  AND telefono IS NOT NULL;`}
+-- Comparación numérica
+SELECT nombre, precio
+FROM producto
+WHERE precio > 10;`}
         />
       </div>
 
@@ -100,8 +104,12 @@ WHERE email LIKE '%@ejemplo.com'
           </h4>
           <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
             Además de listar columnas tal cual en la tabla, el <strong className="font-semibold text-slate-800 dark:text-slate-100">SELECT</strong> permite
-            el comodín <strong className="font-semibold text-slate-800 dark:text-slate-100">*</strong>, elegir columnas concretas, renombrar resultados con{' '}
-            <strong className="font-semibold text-slate-800 dark:text-slate-100">AS</strong> y construir valores calculados con operadores aritméticos.
+            el comodín <strong className="font-semibold text-slate-800 dark:text-slate-100">*</strong>, elegir columnas concretas y construir valores
+            calculados con operadores aritméticos (<strong className="font-semibold text-slate-800 dark:text-slate-100">+</strong>,{' '}
+            <strong className="font-semibold text-slate-800 dark:text-slate-100">-</strong>,{' '}
+            <strong className="font-semibold text-slate-800 dark:text-slate-100">*</strong>,{' '}
+            <strong className="font-semibold text-slate-800 dark:text-slate-100">/</strong>) sobre los datos del{' '}
+            <strong className="font-semibold text-slate-800 dark:text-slate-100">FROM</strong>.
           </p>
         </header>
 
@@ -113,8 +121,7 @@ WHERE email LIKE '%@ejemplo.com'
             example={`USE tienda_curso;
 
 SELECT *
-FROM cliente
-LIMIT 10;`}
+FROM cliente;`}
           />
 
           <DqlSection
@@ -132,30 +139,59 @@ FROM cliente;`}
           />
 
           <DqlSection
-            command="AS"
-            title="Alias de columna o de tabla"
-            definition="AS asigna un nombre alternativo a una columna del resultado (alias visible en el encabezado) o a la tabla en FROM para acortar referencias. La palabra AS es opcional en muchos casos, pero dejarla explícita mejora la lectura."
+            command="+"
+            title="Suma"
+            definition="Suma dos valores numéricos. Puedes sumar una columna con un número fijo, dos columnas entre sí o dos números literales. El resultado aparece como una columna nueva en el resultado, sin modificar los datos guardados en la tabla."
             example={`USE tienda_curso;
 
+-- Precio original + costo fijo de envío (5)
 SELECT
-  nombre AS nombre_cliente,
-  email AS correo
-FROM cliente AS c
-WHERE c.id_cliente > 0;`}
+  nombre,
+  precio,
+  precio + 5
+FROM producto;`}
           />
 
           <DqlSection
-            command="+, -, *, /"
-            title="Operadores matemáticos"
-            definition="En la lista del SELECT puedes usar +, -, * y / sobre valores numéricos o columnas numéricas para obtener columnas calculadas. Respeta la precedencia de operadores y usa paréntesis cuando mezcles operaciones."
+            command="-"
+            title="Resta"
+            definition="Resta el segundo valor del primero. Sirve para calcular diferencias: por ejemplo, restar un descuento fijo al precio de cada producto. El resultado es una columna calculada que se muestra junto al resto de columnas del SELECT."
             example={`USE tienda_curso;
 
+-- Precio original menos un descuento fijo de 10
 SELECT
-  id_cliente,
-  id_cliente * 10 AS id_x_10,
-  (100 + 25) / 5 AS literal_calculado,
-  CHAR_LENGTH(nombre) + CHAR_LENGTH(IFNULL(telefono, '')) AS longitud_textos
-FROM cliente;`}
+  nombre,
+  precio,
+  precio - 10
+FROM producto;`}
+          />
+
+          <DqlSection
+            command="×"
+            title="Multiplicación"
+            definition="Multiplica dos valores numéricos. En SQL se escribe con el asterisco (*). Es útil para escalar un precio: duplicar el costo de una unidad, calcular el total de varias piezas iguales o aplicar un porcentaje (por ejemplo, multiplicar por 1.15 para sumar un 15 %)."
+            example={`USE tienda_curso;
+
+-- Precio de dos unidades del mismo producto
+SELECT
+  nombre,
+  precio,
+  precio * 2
+FROM producto;`}
+          />
+
+          <DqlSection
+            command="/"
+            title="División"
+            definition="Divide el primer valor entre el segundo. Permite repartir un monto en partes iguales o obtener un valor unitario a partir de un total. Si mezclas varias operaciones, usa paréntesis para dejar claro qué se calcula primero."
+            example={`USE tienda_curso;
+
+-- Mitad del precio de cada producto
+SELECT
+  nombre,
+  precio,
+  precio / 2
+FROM producto;`}
           />
         </div>
       </div>

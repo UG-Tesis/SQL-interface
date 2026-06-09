@@ -3,6 +3,8 @@ import { isCursoTopicId } from '../../domain/config/cursoModules.config';
 import { DclTopicBody } from './DclTopicBody';
 import { DdlTopicBody } from './DdlTopicBody';
 import { DmlTopicBody } from './DmlTopicBody';
+import { DqlAdvancedTopicBody } from './DqlAdvancedTopicBody';
+import { DqlJoinFiltersTopicBody } from './DqlJoinFiltersTopicBody';
 import { DqlTopicBody } from './DqlTopicBody';
 import { ModuleCompleteButton } from './ModuleCompleteButton';
 import { TopicArticle } from './TopicArticle';
@@ -14,6 +16,8 @@ interface TopicCardProps {
 function topicBody(topic: Topic) {
   if (topic.id === 'c2') return <DmlTopicBody />;
   if (topic.id === 'c3') return <DqlTopicBody />;
+  if (topic.id === 'c4') return <DqlAdvancedTopicBody />;
+  if (topic.id === 'c5') return <DqlJoinFiltersTopicBody />;
   if (topic.content) {
     return (
       <div className="text-sm leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">

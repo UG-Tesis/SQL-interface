@@ -63,18 +63,18 @@ VALUES
         <DmlSection
           command="UPDATE"
           title="Modificar filas existentes"
-          definition="Cambia valores de columnas en las filas que cumplan una condición. Casi siempre debe ir acompañado de WHERE para no actualizar toda la tabla por error."
+          definition="Cambia el valor de una columna en una fila que ya existe. Indicas qué columna modificas con SET y qué fila tocar con WHERE, normalmente usando el id del registro."
           example={`USE tienda_curso;
 
--- Corregir un teléfono para un cliente concreto
+-- Cambiar el teléfono del cliente 1
 UPDATE cliente
 SET telefono = '0991111222'
 WHERE id_cliente = 1;
 
--- Actualizar varias filas que cumplan el filtro
+-- Cambiar el email del cliente 2
 UPDATE cliente
-SET email = LOWER(TRIM(email))
-WHERE email IS NOT NULL;`}
+SET email = 'nuevo@ejemplo.com'
+WHERE id_cliente = 2;`}
         />
 
         <DmlSection

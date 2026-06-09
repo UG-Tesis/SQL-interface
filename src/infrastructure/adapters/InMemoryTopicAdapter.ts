@@ -22,49 +22,24 @@ const TOPICS: Topic[] = [
     id: 'c3',
     sectionId: 'curso',
     title: 'Lenguaje de Consulta de Datos',
-    description: 'DQL: SELECT, FROM, WHERE y fundamentos del listado de datos.',
+    description: 'DQL: SELECT, FROM, WHERE. Comandos básicos del SELECT: *, columnas específicas y operadores matemáticos (+, -, *, /).',
     content: '',
   },
   {
     id: 'c4',
     sectionId: 'curso',
-    title: 'Lenguaje de Consulta de Datos',
-    description: 'Extensión de DQL: orden, agrupación, límites y funciones en consultas.',
-    content: `Extensión de DQL
-ORDER BY
-GROUP BY
-LIMIT
-
-Funciones y operaciones en SELECT
-Manipulación de texto: CONCAT, UPPER, LOWER, SUBSTRING
-Condicional: CASE WHEN
-Funciones de fecha: CURRENT_DATE, NOW, DATEDIFF, TIMESTAMPDIFF
-Funciones de agregación: COUNT, SUM, AVG, MAX, MIN`,
+    title: 'Lenguaje de Consulta de Datos – Nivel Avanzado',
+    description:
+      'DQL avanzado: ORDER BY, GROUP BY y LIMIT. Agregación: COUNT, SUM, AVG, MAX y MIN.',
+    content: '',
   },
   {
     id: 'c5',
     sectionId: 'curso',
-    title: 'Lenguaje de Consulta de Datos – Uniones, Filtros y Vistas',
-    description: 'FROM con uniones, WHERE avanzado y vistas con CREATE VIEW.',
-    content: `Comandos del FROM (relación de tablas)
-JOIN
-INNER JOIN
-LEFT JOIN
-RIGHT JOIN
-CROSS JOIN
-
-Combinación de resultados (operadores de conjunto)
-UNION
-UNION ALL
-
-Comandos del WHERE (filtros avanzados)
-Operadores de comparación: =, <, >, !=
-Operadores lógicos: AND, OR, NOT
-Operadores de rango: BETWEEN, IN
-Operadores de patrones: LIKE (%, _)
-
-Vistas
-CREATE VIEW`,
+    title: 'Lenguaje de Consulta de Datos – Uniones y Filtros',
+    description:
+      'FROM avanzado: JOIN. WHERE avanzado: =, <, >, !=, AND, OR, NOT, BETWEEN, IN y LIKE (%, _).',
+    content: '',
   },
   // Actividades
   {
