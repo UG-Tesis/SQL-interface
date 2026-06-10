@@ -13,16 +13,16 @@ export const CURSO_MODULE_DEFINITIONS: CursoModuleDefinition[] = [
     descripcion: 'DDL y DCL: CREATE, ALTER, DROP, GRANT y REVOKE.',
   },
   {
-    topicId: 'c2',
-    orden: 2,
-    nombre: 'Lenguaje de Manipulación de Datos',
-    descripcion: 'DML: INSERT, UPDATE y DELETE.',
-  },
-  {
     topicId: 'c3',
-    orden: 3,
+    orden: 2,
     nombre: 'Lenguaje de Consulta de Datos – Nivel Básico',
     descripcion: 'DQL: SELECT, FROM, WHERE. Comandos básicos del SELECT: *, columnas específicas y operadores matemáticos.',
+  },
+  {
+    topicId: 'c2',
+    orden: 3,
+    nombre: 'Lenguaje de Manipulación de Datos',
+    descripcion: 'DML: INSERT, UPDATE y DELETE.',
   },
   {
     topicId: 'c4',

@@ -111,7 +111,7 @@ export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPractice
     : 'validate_only';
 
   const sandboxTable =
-    activeEntry && activeEntry.moduloOrden >= 3 ? SANDBOX_DQL_TABLE : SANDBOX_DML_TABLE;
+    activeEntry && activeEntry.topicId === 'c2' ? SANDBOX_DML_TABLE : SANDBOX_DQL_TABLE;
 
   const handleValidateQuery = async () => {
     const statement = sql.trim();
