@@ -1,7 +1,45 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { SubNavItem } from '../../domain/models/SubNavItem';
 import { FadeInUp } from './FadeInUp';
 import { ThemeToggle } from './ThemeToggle';
+
+function findExpandedModuleId(items: SubNavItem[], activeId: string | null): string | null {
+  if (!activeId) {
+    return items.find((item) => item.isGroupHeader)?.id ?? null;
+  }
+
+  const activeItem = items.find((item) => item.id === activeId);
+  if (activeItem?.moduleGroupId) {
+    return activeItem.moduleGroupId;
+  }
+
+  let currentHeaderId: string | null = null;
+  for (const item of items) {
+    if (item.isGroupHeader) {
+      currentHeaderId = item.id;
+      continue;
+    }
+    if (item.id === activeId) {
+      return currentHeaderId;
+    }
+  }
+
+  return items.find((item) => item.isGroupHeader)?.id ?? null;
+}
+
+function getFirstActivityIdInModule(items: SubNavItem[], headerId: string): string | null {
+  for (const item of items) {
+    if (item.isGroupHeader || item.moduleGroupId !== headerId) continue;
+    if (!item.id.endsWith('-empty')) {
+      return item.id;
+    }
+  }
+  return null;
+}
+
+function hasCollapsibleModules(items: SubNavItem[]): boolean {
+  return items.some((item) => item.isGroupHeader && items.some((child) => child.moduleGroupId));
+}
 
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(() =>
@@ -38,6 +76,19 @@ export function FixedSidebar({
 }: FixedSidebarProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const isVisible = isDesktop ? !desktopCollapsed : mobileOpen;
+  const collapsibleModules = useMemo(() => hasCollapsibleModules(items), [items]);
+  const expandedModuleId = useMemo(
+    () => (collapsibleModules ? findExpandedModuleId(items, activeId) : null),
+    [collapsibleModules, items, activeId],
+  );
+
+  const handleModuleHeaderClick = (headerId: string) => {
+    if (expandedModuleId === headerId) return;
+    const firstActivityId = getFirstActivityIdInModule(items, headerId);
+    if (firstActivityId) {
+      onActiveIdChange(firstActivityId);
+    }
+  };
 
   return (
     <>
@@ -84,33 +135,150 @@ export function FixedSidebar({
             </div>
           </FadeInUp>
           <nav className="flex flex-col gap-1.5">
-            {items.map((item, index) => {
+            {(() => {
+              let activityNumberInModule = 0;
+
+              return items.map((item, index) => {
+              if (item.isGroupHeader) {
+                activityNumberInModule = 0;
+                const moduleEnabled = item.enabled !== false;
+                const isExpanded = !collapsibleModules || item.id === expandedModuleId;
+
+                return (
+                  <FadeInUp key={item.id} delayMs={90 + index * 40}>
+                    {collapsibleModules ? (
+                      <button
+                        type="button"
+                        onClick={() => handleModuleHeaderClick(item.id)}
+                        aria-expanded={isExpanded}
+                        className={`w-full rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                          moduleEnabled
+                            ? isExpanded
+                              ? 'border-cyan-500/40 bg-white/8'
+                              : 'border-cyan-500/25 bg-white/5 hover:bg-white/8'
+                            : 'border-transparent bg-white/[0.02] opacity-80'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-cyan-300/90">
+                            {item.label}
+                          </p>
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            className={`mt-0.5 shrink-0 text-cyan-300/80 transition-transform duration-200 ${
+                              isExpanded ? 'rotate-180' : ''
+                            }`}
+                            aria-hidden
+                          >
+                            <path d="M6 9l6 6 6-6" />
+                          </svg>
+                        </div>
+                        {!moduleEnabled ? (
+                          <p className="mt-1 text-[11px] text-slate-500">
+                            Completa el módulo en Curso para habilitar
+                          </p>
+                        ) : null}
+                      </button>
+                    ) : (
+                      <div
+                        className={`rounded-xl border px-3 py-2.5 ${
+                          moduleEnabled
+                            ? 'border-cyan-500/25 bg-white/5'
+                            : 'border-transparent bg-white/[0.02] opacity-80'
+                        }`}
+                      >
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-cyan-300/90">
+                          {item.label}
+                        </p>
+                        {!moduleEnabled ? (
+                          <p className="mt-1 text-[11px] text-slate-500">
+                            Completa el módulo en Curso para habilitar
+                          </p>
+                        ) : null}
+                      </div>
+                    )}
+                  </FadeInUp>
+                );
+              }
+
+              if (collapsibleModules && item.moduleGroupId !== expandedModuleId) {
+                return null;
+              }
+
               const isActive = activeId === item.id;
+              const isEnabled = item.enabled !== false;
+              const isPlaceholder = item.id.endsWith('-empty');
+
+              if (isPlaceholder) {
+                return (
+                  <FadeInUp key={item.id} delayMs={90 + index * 40}>
+                    <p className="px-3 py-1 text-xs text-slate-500">{item.label}</p>
+                  </FadeInUp>
+                );
+              }
+
+              activityNumberInModule += 1;
+
               return (
                 <FadeInUp key={item.id} delayMs={90 + index * 55}>
                   <button
                     type="button"
-                    onClick={() => onActiveIdChange(item.id)}
+                    disabled={!isEnabled}
+                    onClick={() => {
+                      if (isEnabled) onActiveIdChange(item.id);
+                    }}
                     className={`group flex w-full items-start gap-3 rounded-xl border px-3 py-2.5 text-left text-sm transition-all duration-200 ${
-                      isActive
-                        ? 'border-cyan-400/35 bg-sky-500/15 text-sky-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
-                        : 'border-transparent text-slate-300 hover:border-cyan-500/20 hover:bg-white/5 hover:text-white'
+                      !isEnabled
+                        ? 'cursor-not-allowed border-transparent text-slate-500/70 opacity-70'
+                        : isActive
+                          ? 'border-cyan-400/35 bg-sky-500/15 text-sky-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
+                          : 'border-transparent text-slate-300 hover:border-cyan-500/20 hover:bg-white/5 hover:text-white'
                     }`}
                   >
                     <span
                       className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold tabular-nums transition-colors ${
-                        isActive
-                          ? 'bg-cyan-500/30 text-cyan-100 ring-1 ring-cyan-400/40'
-                          : 'bg-white/5 text-slate-500 group-hover:bg-cyan-500/15 group-hover:text-cyan-200'
+                        !isEnabled
+                          ? 'bg-white/5 text-slate-600'
+                          : isActive
+                            ? 'bg-cyan-500/30 text-cyan-100 ring-1 ring-cyan-400/40'
+                            : 'bg-white/5 text-slate-500 group-hover:bg-cyan-500/15 group-hover:text-cyan-200'
                       }`}
                     >
-                      {String(index + 1).padStart(2, '0')}
+                      {!isEnabled ? (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                          <rect x="5" y="11" width="14" height="10" rx="2" />
+                          <path d="M8 11V8a4 4 0 1 1 8 0v3" />
+                        </svg>
+                      ) : (
+                        String(activityNumberInModule)
+                      )}
                     </span>
-                    <span className="leading-snug">{item.label}</span>
+                    <span className="leading-snug">
+                      {item.label}
+                      {item.completed ? (
+                        <span className="mt-1 block text-[11px] font-medium text-emerald-300/90">
+                          Completado · 100%
+                        </span>
+                      ) : !isEnabled ? (
+                        <span className="mt-1 block text-[11px] font-medium text-slate-500">
+                          Completa el módulo anterior
+                        </span>
+                      ) : (item.porcentaje ?? 0) > 0 ? (
+                        <span className="mt-1 block text-[11px] font-medium text-cyan-300/80">
+                          Avance {item.porcentaje}%
+                        </span>
+                      ) : null}
+                    </span>
                   </button>
                 </FadeInUp>
               );
-            })}
+            });
+            })()}
           </nav>
         </div>
       </aside>

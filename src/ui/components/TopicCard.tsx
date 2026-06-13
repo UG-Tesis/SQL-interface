@@ -1,8 +1,12 @@
 import type { Topic } from '../../domain/models/Topic';
+import { isCursoTopicId } from '../../domain/config/cursoModules.config';
 import { DclTopicBody } from './DclTopicBody';
 import { DdlTopicBody } from './DdlTopicBody';
 import { DmlTopicBody } from './DmlTopicBody';
+import { DqlAdvancedTopicBody } from './DqlAdvancedTopicBody';
+import { DqlJoinFiltersTopicBody } from './DqlJoinFiltersTopicBody';
 import { DqlTopicBody } from './DqlTopicBody';
+import { ModuleCompleteButton } from './ModuleCompleteButton';
 import { TopicArticle } from './TopicArticle';
 
 interface TopicCardProps {
@@ -12,6 +16,8 @@ interface TopicCardProps {
 function topicBody(topic: Topic) {
   if (topic.id === 'c2') return <DmlTopicBody />;
   if (topic.id === 'c3') return <DqlTopicBody />;
+  if (topic.id === 'c4') return <DqlAdvancedTopicBody />;
+  if (topic.id === 'c5') return <DqlJoinFiltersTopicBody />;
   if (topic.content) {
     return (
       <div className="text-sm leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">
@@ -20,6 +26,15 @@ function topicBody(topic: Topic) {
     );
   }
   return null;
+}
+
+function ModuleCompleteFooter({ topicId }: { topicId: string }) {
+  if (!isCursoTopicId(topicId)) return null;
+  return (
+    <div className="pt-2">
+      <ModuleCompleteButton topicId={topicId} />
+    </div>
+  );
 }
 
 /**
@@ -41,13 +56,17 @@ export function TopicCard({ topic }: TopicCardProps) {
         >
           <DclTopicBody />
         </TopicArticle>
+        <ModuleCompleteFooter topicId={topic.id} />
       </div>
     );
   }
 
   return (
-    <TopicArticle title={topic.title} description={topic.description || undefined}>
-      {topicBody(topic)}
-    </TopicArticle>
+    <div className="space-y-6">
+      <TopicArticle title={topic.title} description={topic.description || undefined}>
+        {topicBody(topic)}
+      </TopicArticle>
+      <ModuleCompleteFooter topicId={topic.id} />
+    </div>
   );
 }

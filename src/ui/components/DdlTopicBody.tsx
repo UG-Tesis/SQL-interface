@@ -37,86 +37,63 @@ export function DdlTopicBody() {
           Data Definition Language (DDL)
         </h4>
         <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-          El <strong className="font-semibold text-slate-800 dark:text-slate-100">DDL</strong> es el subconjunto de SQL
-          dedicado a definir y modificar la <strong className="font-semibold text-slate-800 dark:text-slate-100">estructura</strong>{' '}
-          de la base de datos: tablas, índices, vistas u otros objetos. No opera sobre filas concretas
-          de datos (eso corresponde al DML). Las sentencias DDL suelen ejecutarse en el área de consultas
-          de <strong className="font-semibold text-slate-800 dark:text-slate-100">MySQL Workbench</strong>: escribes el script,
-          seleccionas la conexión y el esquema, y ejecutas con el rayo o <kbd className="rounded border border-slate-300 bg-white px-1.5 py-0.5 font-mono text-xs dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">Ctrl</kbd> +{' '}
-          <kbd className="rounded border border-slate-300 bg-white px-1.5 py-0.5 font-mono text-xs dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">Enter</kbd>.
+          El <strong className="font-semibold text-slate-800 dark:text-slate-100">DDL</strong> define la{' '}
+          <strong className="font-semibold text-slate-800 dark:text-slate-100">estructura</strong> de la base de datos:
+          bases de datos, tablas y columnas. No inserta ni modifica filas de datos; eso lo hace el DML. En este módulo
+          trabajarás con cuatro comandos: <strong className="font-semibold text-slate-800 dark:text-slate-100">CREATE</strong>,{' '}
+          <strong className="font-semibold text-slate-800 dark:text-slate-100">ALTER</strong>,{' '}
+          <strong className="font-semibold text-slate-800 dark:text-slate-100">DROP</strong> y{' '}
+          <strong className="font-semibold text-slate-800 dark:text-slate-100">TRUNCATE</strong>.
         </p>
       </header>
 
       <div className="flex flex-col gap-6">
         <DdlSection
           command="CREATE"
-          title="Crear objetos en el servidor"
-          definition="Crea bases de datos, tablas, índices u otros objetos. En tablas se declaran columnas, tipos de datos y restricciones (clave primaria, no nulo, etc.)."
-          example={`-- Crear base de datos (si no existe) y usarla
-CREATE DATABASE IF NOT EXISTS tienda_curso
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
+          title="Crear base de datos y tablas"
+          definition="Sirve para crear objetos nuevos. Con CREATE DATABASE defines el esquema donde guardarás tus tablas. Con CREATE TABLE defines el nombre de la tabla y sus columnas con su tipo de dato."
+          example={`-- Crear la base de datos
+CREATE DATABASE tienda_curso;
 
 USE tienda_curso;
 
--- Crear tabla con restricciones típicas
-CREATE TABLE IF NOT EXISTS cliente (
-  id_cliente INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  nombre VARCHAR(80) NOT NULL,
-  email VARCHAR(120) NOT NULL,
-  fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id_cliente),
-  UNIQUE KEY uq_cliente_email (email)
-) ENGINE=InnoDB;`}
+-- Crear la tabla cliente
+CREATE TABLE cliente (
+  id_cliente INT,
+  nombre VARCHAR(80),
+  email VARCHAR(120)
+);`}
         />
 
         <DdlSection
           command="ALTER"
-          title="Cambiar la estructura de un objeto existente"
-          definition="Modifica tablas ya creadas: agregar o eliminar columnas, cambiar tipos, añadir claves o renombrar. Útil cuando el modelo evoluciona sin perder la tabla completa."
+          title="Modificar una tabla existente"
+          definition="Cambia la estructura de una tabla que ya existe, sin borrarla. El uso más común es agregar una columna nueva con ADD COLUMN."
           example={`USE tienda_curso;
 
--- Agregar una columna
+-- Agregar la columna telefono a la tabla cliente
 ALTER TABLE cliente
-  ADD COLUMN telefono VARCHAR(20) NULL AFTER email;
-
--- Agregar un índice para acelerar búsquedas por nombre
-ALTER TABLE cliente
-  ADD INDEX idx_cliente_nombre (nombre);
-
--- Cambiar tipo o tamaño de una columna (ajusta según tus datos)
-ALTER TABLE cliente
-  MODIFY COLUMN telefono VARCHAR(32) NULL;`}
+ADD COLUMN telefono VARCHAR(20);`}
         />
 
         <DdlSection
           command="DROP"
-          title="Eliminar objetos del servidor"
-          definition="Elimina por completo un objeto (tabla, base de datos, índice, vista, etc.). Es una operación destructiva; conviene usar respaldo o entornos de prueba antes de ejecutar en producción."
+          title="Eliminar una tabla"
+          definition="Borra por completo una tabla del servidor, incluyendo su estructura y todos los datos que tenía. Úsalo solo cuando ya no necesites esa tabla."
           example={`USE tienda_curso;
 
--- Eliminar solo un índice
-ALTER TABLE cliente
-  DROP INDEX idx_cliente_nombre;
-
--- Eliminar la tabla completa (y sus datos)
-DROP TABLE IF EXISTS cliente;
-
--- Eliminar la base de datos completa (¡muy destructivo!)
--- DROP DATABASE IF EXISTS tienda_curso;`}
+-- Eliminar la tabla cliente
+DROP TABLE cliente;`}
         />
 
         <DdlSection
           command="TRUNCATE"
-          title="Vaciar una tabla rápidamente"
-          definition="Elimina todas las filas de la tabla pero conserva la estructura (columnas, índices). En InnoDB suele ser más rápido que DELETE sin WHERE para vaciar todo; reinicia el contador AUTO_INCREMENT. No uses TRUNCATE si necesitas disparadores DELETE por fila o eliminar solo un subconjunto."
+          title="Vaciar una tabla"
+          definition="Elimina todas las filas de una tabla, pero deja la tabla creada con sus columnas. La estructura se mantiene; solo queda vacía de datos."
           example={`USE tienda_curso;
 
--- Vaciar la tabla: queda sin filas, la definición se mantiene
-TRUNCATE TABLE cliente;
-
--- Equivalente conceptual a borrar todas las filas (más lento en tablas grandes):
--- DELETE FROM cliente;`}
+-- Borrar todas las filas de cliente, la tabla sigue existiendo
+TRUNCATE TABLE cliente;`}
         />
       </div>
 
