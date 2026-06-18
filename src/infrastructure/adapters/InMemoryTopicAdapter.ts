@@ -12,17 +12,17 @@ const TOPICS: Topic[] = [
     content: '',
   },
   {
+    id: 'c2',
+    sectionId: 'curso',
+    title: 'Lenguaje de Manipulación de Datos',
+    description: 'DML: INSERT, UPDATE y DELETE.',
+    content: '',
+  },
+  {
     id: 'c3',
     sectionId: 'curso',
     title: 'Lenguaje de Consulta de Datos',
     description: 'DQL: SELECT, FROM, WHERE. Comandos básicos del SELECT: *, columnas específicas y operadores matemáticos (+, -, *, /).',
-    content: '',
-  },
-  {
-    id: 'c2',
-    sectionId: 'curso',
-    title: 'Lenguaje de Manipulación de Datos',
-    description: '',
     content: '',
   },
   {
