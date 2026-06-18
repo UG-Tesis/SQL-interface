@@ -21,169 +21,169 @@ const ROUNDS: GameRound[] = [
   {
     id: 'r1',
     tag: 'INSERT',
-    title: 'Carga de feria comercial',
+    title: 'Registrar clientes nuevos',
     scenario:
-      'La tienda capturó en papel a tres clientes nuevos durante una feria. Ya validaste que no existen en la base. Debes registrarlos en cliente con nombre y email, en el menor número de viajes al servidor y sin filas duplicadas por error de re-ejecución.',
-    question: '¿Qué estrategia encaja mejor con buenas prácticas de DML?',
+      'En la tabla cliente debes agregar tres personas que aún no están en la base de datos: Ana Ruiz, Luis Paz y Sofía Núñez, con su nombre y correo. Es el mismo tipo de caso que practicaste con INSERT en la lección.',
+    question: '¿Qué sentencia INSERT es la más adecuada según lo visto en el curso?',
     options: [
       {
         id: 'r1a',
-        summary: 'Un solo INSERT con varias tuplas',
+        summary: 'Un INSERT con varias filas',
         sql: `INSERT INTO cliente (nombre, email) VALUES
-  ('Patricia Mora', 'patricia@ejemplo.com'),
-  ('Diego Vera', 'diego@ejemplo.com'),
+  ('Ana Ruiz', 'ana@ejemplo.com'),
+  ('Luis Paz', 'luis@ejemplo.com'),
   ('Sofía Núñez', 'sofia@ejemplo.com');`,
         correct: true,
         feedback:
-          'Correcto: un INSERT multi-fila es idiomático, atómico en una sentencia y reduce latencia. Si necesitaras idempotencia ante re-ejecución, podrías combinarlo con validaciones o claves únicas en email.',
+          'Correcto: en la lección vimos que puedes insertar varias filas en una sola sentencia, listando columnas y valores en el mismo orden.',
       },
       {
         id: 'r1b',
-        summary: 'Tres INSERT separados',
-        sql: `INSERT INTO cliente (nombre, email) VALUES ('Patricia Mora', 'patricia@ejemplo.com');
-INSERT INTO cliente (nombre, email) VALUES ('Diego Vera', 'diego@ejemplo.com');
+        summary: 'Tres INSERT por separado',
+        sql: `INSERT INTO cliente (nombre, email) VALUES ('Ana Ruiz', 'ana@ejemplo.com');
+INSERT INTO cliente (nombre, email) VALUES ('Luis Paz', 'luis@ejemplo.com');
 INSERT INTO cliente (nombre, email) VALUES ('Sofía Núñez', 'sofia@ejemplo.com');`,
         correct: false,
         feedback:
-          'Funciona, pero es más verboso y abre más ventana a errores parciales (dos filas sí, una no). Para un lote pequeño un solo INSERT suele ser más claro y eficiente.',
+          'También insertaría los datos, pero son tres sentencias en lugar de una. El curso muestra el INSERT con varias filas como forma más práctica para este caso.',
       },
       {
         id: 'r1c',
-        summary: 'UPDATE sobre filas vacías',
+        summary: 'UPDATE en lugar de INSERT',
         sql: `UPDATE cliente
-SET nombre = 'Patricia Mora', email = 'patricia@ejemplo.com'
+SET nombre = 'Ana Ruiz', email = 'ana@ejemplo.com'
 WHERE id_cliente IS NULL;`,
         correct: false,
         feedback:
-          'UPDATE modifica filas existentes; no crea registros nuevos. Si no hay filas que cumplan el WHERE, no insertarás a los tres clientes.',
+          'UPDATE modifica filas que ya existen. Para clientes nuevos debes usar INSERT, como en los ejemplos de la lección.',
       },
       {
         id: 'r1d',
-        summary: 'DELETE previo “por si acaso”',
-        sql: `DELETE FROM cliente WHERE email LIKE '%feria%';
+        summary: 'DELETE antes de insertar',
+        sql: `DELETE FROM cliente WHERE email LIKE '%ejemplo%';
 INSERT INTO cliente (nombre, email) VALUES (...);`,
         correct: false,
         feedback:
-          'Mezclar DELETE con datos reales por convención de nombre es arriesgado: podrías borrar histórico legítimo. Para altas nuevas usa INSERT (y restricciones UNIQUE), no DELETE preventivo.',
+          'No hace falta borrar datos para dar de alta clientes nuevos. INSERT es el comando correcto para agregar registros.',
       },
     ],
   },
   {
     id: 'r2',
     tag: 'UPDATE',
-    title: 'Corrección quirúrgica',
+    title: 'Corregir el correo de un cliente',
     scenario:
-      'Solo el cliente con id_cliente = 42 tiene un email mal tipeado: fino@gmial.com debe quedar fino@gmail.com. El resto de filas no debe cambiar.',
-    question: 'Elige la sentencia adecuada.',
+      'El cliente con id_cliente = 2 tiene un email antiguo. Debes cambiarlo a nuevo@ejemplo.com. Solo esa fila debe modificarse; el resto de la tabla no debe cambiar.',
+    question: '¿Cuál sentencia UPDATE encaja con lo explicado en el curso?',
     options: [
       {
         id: 'r2a',
-        summary: 'UPDATE acotado por clave',
+        summary: 'UPDATE con WHERE por id',
         sql: `UPDATE cliente
-SET email = 'fino@gmail.com'
-WHERE id_cliente = 42;`,
+SET email = 'nuevo@ejemplo.com'
+WHERE id_cliente = 2;`,
         correct: true,
         feedback:
-          'Correcto: UPDATE con WHERE por clave primaria limita el cambio a una fila. Antes de ejecutar en producción, un SELECT con el mismo WHERE confirma el alcance.',
+          'Correcto: UPDATE cambia columnas con SET y acotas la fila con WHERE id_cliente = ..., igual que en el ejemplo de la lección.',
       },
       {
         id: 'r2b',
         summary: 'UPDATE sin WHERE',
         sql: `UPDATE cliente
-SET email = 'fino@gmail.com';`,
+SET email = 'nuevo@ejemplo.com';`,
         correct: false,
         feedback:
-          'Peligro: sin WHERE actualizas el email de todos los clientes al mismo valor, destruyendo datos.',
+          'Sin WHERE cambiarías el email de todos los clientes. Siempre debes indicar qué fila modificar, normalmente con su id.',
       },
       {
         id: 'r2c',
         summary: 'DELETE y volver a insertar',
-        sql: `DELETE FROM cliente WHERE id_cliente = 42;
-INSERT INTO cliente (nombre, email) VALUES ('Fino', 'fino@gmail.com');`,
+        sql: `DELETE FROM cliente WHERE id_cliente = 2;
+INSERT INTO cliente (nombre, email) VALUES ('Cliente', 'nuevo@ejemplo.com');`,
         correct: false,
         feedback:
-          'Pierdes el mismo id_cliente (AUTO_INCREMENT generará otro), rompes referencias si otras tablas apuntan al 42, y es más trabajo que un UPDATE puntual.',
+          'No es necesario borrar y crear de nuevo. Para corregir un dato existente se usa UPDATE.',
       },
       {
         id: 'r2d',
-        summary: 'INSERT duplicado',
+        summary: 'INSERT de otro cliente',
         sql: `INSERT INTO cliente (nombre, email)
-VALUES ('Fino', 'fino@gmail.com');`,
+VALUES ('Cliente', 'nuevo@ejemplo.com');`,
         correct: false,
         feedback:
-          'INSERT añade otra fila; no corrige la fila 42. Además podrías violar UNIQUE en email si existe.',
+          'INSERT agrega una fila nueva; no corrige la del cliente 2. Para modificar datos existentes usa UPDATE.',
       },
     ],
   },
   {
     id: 'r3',
     tag: 'DELETE',
-    title: 'Baja por solicitud del titular',
+    title: 'Eliminar un registro',
     scenario:
-      'Por política de privacidad debes eliminar por completo la fila del cliente id_cliente = 77 en la tabla cliente (no hay hijos referenciando en este ejercicio).',
-    question: '¿Cuál es la opción correcta?',
+      'Debes quitar de la tabla cliente al registro con id_cliente = 99. Es el mismo tipo de ejercicio que el ejemplo DELETE de la lección.',
+    question: '¿Qué sentencia elimina solo ese cliente?',
     options: [
       {
         id: 'r3a',
-        summary: 'DELETE filtrado',
+        summary: 'DELETE con WHERE por id',
         sql: `DELETE FROM cliente
-WHERE id_cliente = 77;`,
+WHERE id_cliente = 99;`,
         correct: true,
         feedback:
-          'Correcto: DELETE con WHERE elimina solo las filas que cumplen la condición. Verifica antes con SELECT el mismo WHERE.',
+          'Correcto: DELETE FROM tabla WHERE condición elimina solo las filas que cumplen la condición, como en el ejemplo del curso.',
       },
       {
         id: 'r3b',
-        summary: 'Vaciar toda la tabla',
+        summary: 'DELETE sin WHERE',
         sql: `DELETE FROM cliente;`,
         correct: false,
         feedback:
-          'Sin WHERE borras todas las filas de cliente, no solo la 77. Es uno de los errores más graves en DML.',
+          'Sin WHERE se borrarían todas las filas de la tabla. La lección advierte que esto es un riesgo alto.',
       },
       {
         id: 'r3c',
-        summary: 'UPDATE “lógico”',
+        summary: 'UPDATE poniendo NULL',
         sql: `UPDATE cliente
 SET nombre = NULL, email = NULL
-WHERE id_cliente = 77;`,
+WHERE id_cliente = 99;`,
         correct: false,
         feedback:
-          'Eso anonimiza o anula columnas, pero la fila sigue existiendo. El enunciado pide eliminar la fila → DELETE.',
+          'Eso vacía columnas, pero la fila sigue en la tabla. Si el objetivo es eliminar el registro, usa DELETE.',
       },
       {
         id: 'r3d',
-        summary: 'DROP de tabla',
+        summary: 'DROP TABLE',
         sql: `DROP TABLE cliente;`,
         correct: false,
         feedback:
-          'DROP es DDL: elimina la tabla entera y su definición, no una fila. No corresponde al caso.',
+          'DROP es DDL (módulo 1): elimina la tabla entera, no una fila. Para borrar registros se usa DELETE.',
       },
     ],
   },
   {
     id: 'r4',
     tag: 'MIXTO',
-    title: 'Auditoría de riesgo',
+    title: '¿Cuál es la más peligrosa?',
     scenario:
-      'Revisas el historial de consultas de un becario. Todas las sentencias compilan, pero una de ellas podría vaciar o corromper masivamente datos de cliente si se ejecutara en el esquema equivocado.',
-    question: '¿Cuál es la más crítica en términos de alcance destructivo?',
+      'Revisa estas tres sentencias sobre la tabla cliente. Una de ellas puede borrar todos los registros si la ejecutas por error.',
+    question: '¿Cuál es la más riesgosa?',
     options: [
       {
         id: 'r4a',
-        summary: 'DELETE sin filtro',
+        summary: 'DELETE sin WHERE',
         sql: `DELETE FROM cliente;`,
         correct: true,
         feedback:
-          'Correcto: sin WHERE se eliminan todas las filas de la tabla. En muchos entornos es irreversible sin backup.',
+          'Correcto: sin WHERE se eliminan todas las filas. En la lección se marca como un error grave en DML.',
       },
       {
         id: 'r4b',
-        summary: 'DELETE acotado',
+        summary: 'DELETE con WHERE por id',
         sql: `DELETE FROM cliente
 WHERE id_cliente = 12;`,
         correct: false,
         feedback:
-          'Es destructivo solo para las filas que cumplen la condición; el alcance está controlado si el WHERE es correcto.',
+          'Solo afecta al cliente 12. El alcance está controlado gracias al WHERE.',
       },
       {
         id: 'r4c',
@@ -192,64 +192,64 @@ WHERE id_cliente = 12;`,
 VALUES ('Prueba', 'prueba@ejemplo.com');`,
         correct: false,
         feedback:
-          'INSERT añade datos; no borra existentes. El riesgo es distinto (duplicados, constraints), no el vaciado masivo.',
+          'INSERT agrega datos; no borra los que ya existen.',
       },
       {
         id: 'r4d',
-        summary: 'UPDATE acotado',
+        summary: 'UPDATE con WHERE por id',
         sql: `UPDATE cliente
-SET telefono = '0990000000'
-WHERE id_cliente = 12;`,
+SET telefono = '0991111222'
+WHERE id_cliente = 1;`,
         correct: false,
         feedback:
-          'Con WHERE bien definido el daño está acotado. El problema grave es UPDATE o DELETE sin WHERE.',
+          'Con WHERE bien escrito solo cambias una fila. El gran riesgo en DML suele ser UPDATE o DELETE sin WHERE.',
       },
     ],
   },
   {
     id: 'r5',
     tag: 'UPDATE',
-    title: 'Normalización masiva controlada',
+    title: 'Cambiar el teléfono de un cliente',
     scenario:
-      'Marketing exige que todos los emails existentes en cliente queden en minúsculas y sin espacios al inicio/fin, para un envío de campaña. Hay miles de filas y solo deben cambiar las que tienen email no nulo.',
-    question: '¿Qué planteamiento es el adecuado con DML?',
+      'El cliente con id_cliente = 1 debe actualizar su teléfono a 0991111222. Los demás clientes no deben modificarse.',
+    question: '¿Qué sentencia cumple la orden?',
     options: [
       {
         id: 'r5a',
-        summary: 'UPDATE con predicado y función',
+        summary: 'UPDATE telefono con WHERE',
         sql: `UPDATE cliente
-SET email = LOWER(TRIM(email))
-WHERE email IS NOT NULL;`,
+SET telefono = '0991111222'
+WHERE id_cliente = 1;`,
         correct: true,
         feedback:
-          'Correcto: UPDATE alcanza todas las filas que cumplen el predicado y aplica la transformación en bloque. Antes conviene SELECT COUNT(*) con el mismo WHERE para dimensionar el impacto.',
+          'Correcto: es el mismo patrón del ejemplo de la lección — SET para la columna y WHERE para el id del registro.',
       },
       {
         id: 'r5b',
         summary: 'UPDATE sin WHERE',
         sql: `UPDATE cliente
-SET email = LOWER(TRIM(email));`,
+SET telefono = '0991111222';`,
         correct: false,
         feedback:
-          'Sin WHERE también tocas filas con email NULL (dependiendo del motor y función, puedes obtener NULL inesperados o escrituras innecesarias). Mejor acotar con email IS NOT NULL.',
+          'Cambiarías el teléfono de todos los clientes. Debes filtrar con WHERE id_cliente = 1.',
       },
       {
         id: 'r5c',
-        summary: 'INSERT de reemplazo masivo',
-        sql: `INSERT INTO cliente (nombre, email)
-SELECT nombre, LOWER(TRIM(email)) FROM cliente;`,
+        summary: 'INSERT de un cliente nuevo',
+        sql: `INSERT INTO cliente (nombre, telefono)
+VALUES ('Cliente 1', '0991111222');`,
         correct: false,
         feedback:
-          'Duplicarías filas o chocarías con restricciones; no es el patrón para “limpiar” columnas existentes. Para eso se usa UPDATE.',
+          'INSERT crea otro registro distinto; no actualiza al cliente que ya tiene id_cliente = 1.',
       },
       {
         id: 'r5d',
-        summary: 'DELETE de todos y recarga manual',
-        sql: `DELETE FROM cliente;
--- volver a cargar datos a mano`,
+        summary: 'DELETE del cliente 1',
+        sql: `DELETE FROM cliente
+WHERE id_cliente = 1;`,
         correct: false,
         feedback:
-          'Eliminar todo para “normalizar” es inaceptable en un sistema real salvo proceso ETL muy controlado. El requisito se resuelve con UPDATE.',
+          'DELETE elimina la fila. Aquí solo quieres cambiar el teléfono, no borrar al cliente.',
       },
     ],
   },
@@ -352,10 +352,10 @@ export function DmlPracticeGame() {
           </div>
           <p className="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-slate-300">
             {pct >= 80
-              ? 'Muy bien: demuestras criterio sobre cuándo insertar, cómo acotar UPDATE/DELETE y cómo detectar sentencias de alto riesgo.'
+              ? 'Muy bien: reconoces cuándo usar INSERT, UPDATE o DELETE y la importancia del WHERE.'
               : pct >= 50
-                ? 'Buen avance. Repasa los retos fallidos: fíjate en el WHERE, en no usar DELETE/UPDATE “a lo ancho” y en elegir INSERT frente a UPDATE según el caso.'
-                : 'Vale la pena releer la sección y repetir el laboratorio: el DML exige precisión en el alcance de cada sentencia.'}
+                ? 'Buen avance. Repasa los retos fallidos y vuelve a leer los ejemplos de la lección.'
+                : 'Repasa la sección INSERT, UPDATE y DELETE de arriba y vuelve a intentar el laboratorio.'}
           </p>
           <div className="mt-8 flex justify-center">
             <button
@@ -391,8 +391,8 @@ export function DmlPracticeGame() {
               Laboratorio DML en contexto
             </h3>
             <p className="max-w-xl text-xs leading-relaxed text-slate-600 sm:text-sm">
-              Cinco situaciones reales: elige la sentencia que mejor encaja. Una respuesta válida por reto — demuestra
-              que dominas INSERT, UPDATE y DELETE.
+              Cinco situaciones sencillas sobre la tabla <strong className="text-slate-800">cliente</strong>: elige la
+              sentencia correcta de INSERT, UPDATE o DELETE, como en los ejemplos de arriba.
             </p>
           </div>
           <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">

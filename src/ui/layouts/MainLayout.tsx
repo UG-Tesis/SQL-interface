@@ -2,11 +2,13 @@ import {
   cloneElement,
   isValidElement,
   useEffect,
+  useMemo,
   useState,
   type ReactElement,
   type ReactNode,
 } from 'react';
 import type { Section, SectionId } from '../../domain/models/Section';
+import type { SubNavItem } from '../../domain/models/SubNavItem';
 import { SiteHeader } from '../components/SiteHeader';
 import { FixedSidebar } from '../components/FixedSidebar';
 import { useSubNav } from '../hooks/useSubNav';
@@ -14,6 +16,40 @@ import { useActividadSubNav } from '../hooks/useActividadSubNav';
 import { APP_STORAGE_KEYS } from '../../infrastructure/storage/browserStorage';
 
 const SIDEBAR_COLLAPSED_KEY = APP_STORAGE_KEYS.sidebarCollapsed;
+
+function findFirstSelectableId(items: SubNavItem[]): string | null {
+  return (
+    items.find((item) => !item.isGroupHeader && !item.id.endsWith('-empty') && item.enabled !== false)
+      ?.id ?? null
+  );
+}
+
+function resolveSubNavSelection(
+  items: SubNavItem[],
+  storedId: string | undefined,
+  preferredFallback: string | null,
+): string | null {
+  const fallback =
+    preferredFallback ??
+    findFirstSelectableId(items) ??
+    items.find((item) => item.enabled !== false)?.id ??
+    items[0]?.id ??
+    null;
+
+  if (!storedId) return fallback;
+
+  const storedItem = items.find((item) => item.id === storedId);
+  if (
+    !storedItem ||
+    storedItem.isGroupHeader ||
+    storedItem.id.endsWith('-empty') ||
+    storedItem.enabled === false
+  ) {
+    return fallback;
+  }
+
+  return storedId;
+}
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -46,40 +82,21 @@ export function MainLayout({
     }
   });
 
-  const activeSubNavId =
-    activeSection != null
-      ? (selectionBySection[activeSection] ??
-        (isActividadSection ? firstActividadId : null) ??
-        navItems.find((item) => item.enabled !== false)?.id ??
-        navItems[0]?.id ??
-        null)
-      : null;
+  const activeSubNavId = useMemo(() => {
+    if (activeSection == null) return null;
 
-  useEffect(() => {
-    if (
-      isActividadSection &&
-      firstActividadId &&
-      !selectionBySection.actividad &&
-      actividadSubNavItems.length > 0
-    ) {
-      setSelectionBySection((prev) => ({ ...prev, actividad: firstActividadId }));
+    const stored = selectionBySection[activeSection];
+    if (isActividadSection) {
+      return resolveSubNavSelection(navItems, stored, firstActividadId);
     }
-  }, [isActividadSection, firstActividadId, actividadSubNavItems.length, selectionBySection.actividad]);
 
-  useEffect(() => {
-    if (!isActividadSection || navItems.length === 0) return;
-
-    const currentId = selectionBySection.actividad ?? firstActividadId;
-    const currentItem = navItems.find((item) => item.id === currentId);
-    if (currentItem?.isGroupHeader || currentItem?.id.endsWith('-empty')) {
-      const firstSelectable = navItems.find(
-        (item) => !item.isGroupHeader && !item.id.endsWith('-empty'),
-      );
-      if (firstSelectable) {
-        setSelectionBySection((prev) => ({ ...prev, actividad: firstSelectable.id }));
-      }
-    }
-  }, [isActividadSection, navItems, selectionBySection.actividad, firstActividadId]);
+    return (
+      stored ??
+      navItems.find((item) => item.enabled !== false)?.id ??
+      navItems[0]?.id ??
+      null
+    );
+  }, [activeSection, isActividadSection, selectionBySection, navItems, firstActividadId]);
 
   useEffect(() => {
     try {
@@ -161,7 +178,6 @@ export function MainLayout({
       />
       {showSidebar ? (
         <FixedSidebar
-          key={activeSection}
           items={navItems}
           activeId={activeSubNavId}
           onActiveIdChange={handleSubNavChange}

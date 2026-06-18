@@ -27,7 +27,7 @@ const SCENARIOS: ScenarioCard[] = [
     id: 'sc3',
     cmd: 'DROP',
     situation:
-      'El índice idx_temporal_nunca_usado solo ocupa espacio y quieres quitarlo del catálogo sin tocar las filas.',
+      'Creaste una tabla llamada prueba_contactos solo para practicar. Ya terminaste el ejercicio y quieres eliminar esa tabla por completo de la base de datos.',
   },
 ];
 
@@ -49,7 +49,7 @@ const CMD_LABEL: Record<DdlCmd, string> = {
 const CMD_HINT: Record<DdlCmd, string> = {
   CREATE: 'Definir objeto nuevo',
   ALTER: 'Cambiar estructura existente',
-  DROP: 'Eliminar objeto del catálogo',
+  DROP: 'Eliminar tabla u objeto',
 };
 
 function cmdButtonClass(cmd: DdlCmd, active: boolean, matched: boolean, wrong: boolean): string {
@@ -355,9 +355,10 @@ export function DdlMatchGame() {
         <div className="mt-6 flex flex-col gap-4 border-t border-slate-200/80 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-xl text-[11px] leading-relaxed text-slate-600">
             <span className="font-bold text-cyan-700">Tip:</span>{' '}
-            <span className="rounded bg-slate-100 px-1 font-mono text-[10px] text-rose-800">DROP</span> quita el objeto
-            del catálogo; <span className="rounded bg-slate-100 px-1 font-mono text-[10px] text-cyan-800">ALTER</span>{' '}
-            modifica la estructura sin eliminar la tabla completa.
+            <span className="rounded bg-slate-100 px-1 font-mono text-[10px] text-rose-800">DROP</span> elimina un
+            objeto (por ejemplo, una tabla);{' '}
+            <span className="rounded bg-slate-100 px-1 font-mono text-[10px] text-cyan-800">ALTER</span> modifica una
+            tabla existente sin borrarla entera.
           </p>
           <button
             type="button"

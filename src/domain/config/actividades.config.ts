@@ -25,10 +25,7 @@ export function getTopicIdFromModuloOrden(orden: number): string | undefined {
 export type ActividadPracticeMode = 'validate_only' | 'validate_and_execute';
 
 /** Módulo 1: solo validación. Módulo 2+: validar y ejecutar en sandbox. */
-export function getActividadPracticeMode(
-  moduloOrden: number,
-  _actividadOrden: number,
-): ActividadPracticeMode {
+export function getActividadPracticeMode(moduloOrden: number): ActividadPracticeMode {
   if (moduloOrden === 1) return 'validate_only';
   return 'validate_and_execute';
 }

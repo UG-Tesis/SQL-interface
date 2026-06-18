@@ -4,7 +4,7 @@ import {
   moduloActividadHeaderId,
 } from '../../domain/config/actividades.config';
 import type { SubNavItem } from '../../domain/models/SubNavItem';
-import { useActividadesCatalog } from '../session/ActividadesCatalogContext';
+import { useActividadesCatalog } from '../session/useActividadesCatalog';
 
 export function useActividadSubNav(enabled: boolean) {
   const { groups, loading, error, ensureCatalog } = useActividadesCatalog();

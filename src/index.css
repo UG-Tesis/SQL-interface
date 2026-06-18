@@ -85,6 +85,21 @@ body {
   opacity: 0;
 }
 
+/* El menú lateral del curso no debe heredar animaciones de entrada */
+.module-subnav-nav,
+.module-subnav-nav * {
+  animation: none !important;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-in-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .anim-blob {
   animation: anim-blob 18s ease-in-out infinite;
 }

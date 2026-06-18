@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { SubNavItem } from '../../domain/models/SubNavItem';
-import { FadeInUp } from './FadeInUp';
 import { ThemeToggle } from './ThemeToggle';
 
 function findExpandedModuleId(items: SubNavItem[], activeId: string | null): string | null {
@@ -25,6 +24,24 @@ function findExpandedModuleId(items: SubNavItem[], activeId: string | null): str
   }
 
   return items.find((item) => item.isGroupHeader)?.id ?? null;
+}
+
+function getActivityNumbersById(items: SubNavItem[]): Map<string, number> {
+  const map = new Map<string, number>();
+  let activityNumberInModule = 0;
+
+  for (const item of items) {
+    if (item.isGroupHeader) {
+      activityNumberInModule = 0;
+      continue;
+    }
+    if (item.id.endsWith('-empty')) continue;
+
+    activityNumberInModule += 1;
+    map.set(item.id, activityNumberInModule);
+  }
+
+  return map;
 }
 
 function getFirstActivityIdInModule(items: SubNavItem[], headerId: string): string | null {
@@ -81,6 +98,7 @@ export function FixedSidebar({
     () => (collapsibleModules ? findExpandedModuleId(items, activeId) : null),
     [collapsibleModules, items, activeId],
   );
+  const activityNumbersById = useMemo(() => getActivityNumbersById(items), [items]);
 
   const handleModuleHeaderClick = (headerId: string) => {
     if (expandedModuleId === headerId) return;
@@ -129,22 +147,16 @@ export function FixedSidebar({
         </div>
 
         <div className="px-3 py-5 md:px-4">
-          <FadeInUp delayMs={40}>
-            <div className="mb-4 hidden border-b border-white/10 pb-3 text-center md:block">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300/80">Contenido</p>
-            </div>
-          </FadeInUp>
-          <nav className="flex flex-col gap-1.5">
-            {(() => {
-              let activityNumberInModule = 0;
-
-              return items.map((item, index) => {
+          <div className="mb-4 hidden border-b border-white/10 pb-3 text-center md:block">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300/80">Contenido</p>
+          </div>
+          <nav className="module-subnav-nav flex flex-col gap-1.5">
+            {items.map((item) => {
               if (item.isGroupHeader) {
-                activityNumberInModule = 0;
                 const isExpanded = !collapsibleModules || item.id === expandedModuleId;
 
                 return (
-                  <FadeInUp key={item.id} delayMs={90 + index * 40}>
+                  <div key={item.id}>
                     {collapsibleModules ? (
                       <button
                         type="button"
@@ -183,7 +195,7 @@ export function FixedSidebar({
                         </p>
                       </div>
                     )}
-                  </FadeInUp>
+                  </div>
                 );
               }
 
@@ -197,45 +209,43 @@ export function FixedSidebar({
 
               if (isPlaceholder) {
                 return (
-                  <FadeInUp key={item.id} delayMs={90 + index * 40}>
-                    <p className="px-3 py-1 text-xs text-slate-500">{item.label}</p>
-                  </FadeInUp>
+                  <p key={item.id} className="px-3 py-1 text-xs text-slate-500">
+                    {item.label}
+                  </p>
                 );
               }
 
-              activityNumberInModule += 1;
+              const activityNumber = activityNumbersById.get(item.id) ?? 0;
 
               return (
-                <FadeInUp key={item.id} delayMs={90 + index * 55}>
-                  <button
-                    type="button"
-                    disabled={!isEnabled}
-                    onClick={() => {
-                      if (isEnabled) onActiveIdChange(item.id);
-                    }}
-                    className={`group flex w-full items-start gap-3 rounded-xl border px-3 py-2.5 text-left text-sm transition-all duration-200 ${
-                      !isEnabled
-                        ? 'cursor-not-allowed border-transparent text-slate-500/70 opacity-70'
-                        : isActive
-                          ? 'border-cyan-400/35 bg-sky-500/15 text-sky-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
-                          : 'border-transparent text-slate-300 hover:border-cyan-500/20 hover:bg-white/5 hover:text-white'
+                <button
+                  key={item.id}
+                  type="button"
+                  disabled={!isEnabled}
+                  onClick={() => {
+                    if (isEnabled) onActiveIdChange(item.id);
+                  }}
+                  className={`group flex w-full items-start gap-3 rounded-xl border px-3 py-2.5 text-left text-sm opacity-100 transition-colors duration-150 ${
+                    !isEnabled
+                      ? 'cursor-not-allowed border-transparent text-slate-500/70'
+                      : isActive
+                        ? 'border-cyan-400/35 bg-sky-500/15 text-sky-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
+                        : 'border-transparent text-slate-200 hover:border-cyan-500/20 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  <span
+                    className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold tabular-nums transition-colors ${
+                      isActive
+                        ? 'bg-cyan-500/30 text-cyan-100 ring-1 ring-cyan-400/40'
+                        : 'bg-white/5 text-slate-500 group-hover:bg-cyan-500/15 group-hover:text-cyan-200'
                     }`}
                   >
-                    <span
-                      className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold tabular-nums transition-colors ${
-                        isActive
-                          ? 'bg-cyan-500/30 text-cyan-100 ring-1 ring-cyan-400/40'
-                          : 'bg-white/5 text-slate-500 group-hover:bg-cyan-500/15 group-hover:text-cyan-200'
-                      }`}
-                    >
-                      {String(activityNumberInModule)}
-                    </span>
-                    <span className="leading-snug">{item.label}</span>
-                  </button>
-                </FadeInUp>
+                    {String(activityNumber)}
+                  </span>
+                  <span className="leading-snug">{item.label}</span>
+                </button>
               );
-            });
-            })()}
+            })}
           </nav>
         </div>
       </aside>

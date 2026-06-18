@@ -13,7 +13,7 @@ import type { SqlValidationResult } from '../../domain/models/SqlValidationResul
 import { HttpSqlExecutorAdapter } from '../../infrastructure/adapters/HttpSqlExecutorAdapter';
 import { HttpSqlValidationAdapter } from '../../infrastructure/adapters/HttpSqlValidationAdapter';
 import { getApiErrorMessage } from '../../infrastructure/api/apiErrors';
-import { useActividadesCatalog } from '../session/ActividadesCatalogContext';
+import { useActividadesCatalog } from '../session/useActividadesCatalog';
 import { FadeInUp } from './FadeInUp';
 import { SqlResultsTable } from './SqlResultsTable';
 
@@ -166,7 +166,7 @@ export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPractice
   }, [activeEntry?.id]);
 
   const practiceMode = activeEntry
-    ? getActividadPracticeMode(activeEntry.moduloOrden, activeEntry.orden)
+    ? getActividadPracticeMode(activeEntry.moduloOrden)
     : 'validate_only';
 
   const runValidation = useCallback(

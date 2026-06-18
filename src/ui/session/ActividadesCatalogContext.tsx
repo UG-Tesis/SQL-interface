@@ -1,7 +1,6 @@
 import {
   createContext,
   useCallback,
-  useContext,
   useMemo,
   useRef,
   useState,
@@ -24,6 +23,8 @@ interface ActividadesCatalogContextValue {
 }
 
 const ActividadesCatalogContext = createContext<ActividadesCatalogContextValue | null>(null);
+
+export { ActividadesCatalogContext };
 
 export function ActividadesCatalogProvider({ children }: { children: ReactNode }) {
   const [groups, setGroups] = useState<ActividadModuloGroup[]>([]);
@@ -117,12 +118,4 @@ export function ActividadesCatalogProvider({ children }: { children: ReactNode }
   return (
     <ActividadesCatalogContext.Provider value={value}>{children}</ActividadesCatalogContext.Provider>
   );
-}
-
-export function useActividadesCatalog() {
-  const context = useContext(ActividadesCatalogContext);
-  if (!context) {
-    throw new Error('useActividadesCatalog debe usarse dentro de ActividadesCatalogProvider');
-  }
-  return context;
 }

@@ -38,23 +38,6 @@ interface CursoCatalogResponse {
 }
 
 export class HttpActividadesAdapter implements ActividadesPort {
-  async resolveModuloIdByOrden(cursoId: number, orden: number): Promise<number | null> {
-    const modulos = await apiRequest<ModuloResponse[]>(`/modulos?cursoId=${cursoId}`);
-    const modulo = modulos.find((item) => item.orden === orden);
-    return modulo?.id ?? null;
-  }
-
-  async getActividadesByModuloId(moduloId: number): Promise<ActividadPractica[]> {
-    const actividades = await apiRequest<ActividadResponse[]>(
-      `/actividades?moduloId=${moduloId}`,
-    );
-
-    return actividades
-      .filter((item) => item.activo !== false)
-      .sort((a, b) => a.orden - b.orden)
-      .map((item) => this.mapActividad(item));
-  }
-
   async getActividadesCatalog(): Promise<ActividadModuloGroup[]> {
     try {
       const curso = await apiRequest<CursoCatalogResponse>('/cursos/catalog');

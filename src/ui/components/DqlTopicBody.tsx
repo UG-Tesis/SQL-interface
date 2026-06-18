@@ -1,3 +1,4 @@
+import { DqlQueryBuilderGame } from './DqlQueryBuilderGame';
 import { SqlWorkbenchBlock } from './SqlWorkbenchBlock';
 
 function DqlSection({
@@ -194,6 +195,10 @@ SELECT
 FROM producto;`}
           />
         </div>
+      </div>
+
+      <div className="border-t border-cyan-100/80 pt-8 dark:border-slate-700">
+        <DqlQueryBuilderGame />
       </div>
     </div>
   );

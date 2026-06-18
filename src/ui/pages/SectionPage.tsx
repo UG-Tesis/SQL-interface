@@ -1,7 +1,6 @@
 import { lazy, Suspense, useMemo } from 'react';
 import type { SectionId } from '../../domain/models/Section';
 import type { Topic } from '../../domain/models/Topic';
-import { FadeInUp } from '../components/FadeInUp';
 import { PageBackdrop } from '../components/PageBackdrop';
 import { RouteLoader } from '../components/RouteLoader';
 import { TopicCard } from '../components/TopicCard';
@@ -48,17 +47,13 @@ export function SectionPage({ sectionId, topics, activeSubNavId }: SectionPagePr
               <ActividadesPracticePanel activeSubNavId={activeSubNavId} />
             </Suspense>
           ) : visibleTopics.length > 0 ? (
-            visibleTopics.map((topic, index) => (
-              <FadeInUp key={topic.id} delayMs={120 + index * 110}>
-                <TopicCard topic={topic} />
-              </FadeInUp>
-            ))
+            visibleTopics.map((topic) => <TopicCard key={topic.id} topic={topic} />)
           ) : (
-            <FadeInUp delayMs={120} className="py-16 text-center">
+            <div className="py-16 text-center">
               <p className="text-lg text-slate-500">
                 No hay contenido disponible aún para esta sección.
               </p>
-            </FadeInUp>
+            </div>
           )}
         </div>
       </div>

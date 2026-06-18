@@ -1,3 +1,4 @@
+import { DqlAnalyticsGame } from './DqlAnalyticsGame';
 import { SqlWorkbenchBlock } from './SqlWorkbenchBlock';
 
 function DqlAdvancedSection({
@@ -158,6 +159,10 @@ SELECT MIN(precio)
 FROM producto;`}
           />
         </div>
+      </div>
+
+      <div className="border-t border-cyan-100/80 pt-8 dark:border-slate-700">
+        <DqlAnalyticsGame />
       </div>
     </div>
   );

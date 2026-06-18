@@ -1,3 +1,4 @@
+import { DqlJoinFilterGame } from './DqlJoinFilterGame';
 import { SqlWorkbenchBlock } from './SqlWorkbenchBlock';
 
 function DqlJoinFiltersSection({
@@ -185,6 +186,10 @@ FROM cliente
 WHERE nombre LIKE 'A_a';`}
           />
         </div>
+      </div>
+
+      <div className="border-t border-cyan-100/80 pt-8 dark:border-slate-700">
+        <DqlJoinFilterGame />
       </div>
     </div>
   );
