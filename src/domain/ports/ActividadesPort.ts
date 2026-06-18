@@ -6,8 +6,3 @@ export interface ActividadesPort {
   getActividadesCatalog(cursoId: number): Promise<ActividadModuloGroup[]>;
   resolveModuloIdByOrden(cursoId: number, orden: number): Promise<number | null>;
 }
-
-export interface ActividadProgressPort {
-  finalizeActividad(inscripcionId: number, actividadId: number, totalPreguntas: number): Promise<void>;
-  isActividadFinalizada(inscripcionId: number, actividadId: number): Promise<boolean>;
-}

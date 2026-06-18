@@ -7,16 +7,13 @@ import {
 } from '../../domain/config/actividades.config';
 import type { SqlExecutionResult } from '../../domain/models/SqlExecutionResult';
 import type { SqlValidationResult } from '../../domain/models/SqlValidationResult';
-import { HttpActividadesAdapter } from '../../infrastructure/adapters/HttpActividadesAdapter';
 import { HttpSqlExecutorAdapter } from '../../infrastructure/adapters/HttpSqlExecutorAdapter';
 import { HttpSqlValidationAdapter } from '../../infrastructure/adapters/HttpSqlValidationAdapter';
 import { getApiErrorMessage } from '../../infrastructure/api/apiErrors';
 import { useActividadesCatalog } from '../session/ActividadesCatalogContext';
-import { useSession } from '../session/SessionContext';
 import { FadeInUp } from './FadeInUp';
 import { SqlResultsTable } from './SqlResultsTable';
 
-const actividadesAdapter = new HttpActividadesAdapter();
 const sqlExecutorAdapter = new HttpSqlExecutorAdapter();
 const sqlValidationAdapter = new HttpSqlValidationAdapter();
 
@@ -43,59 +40,20 @@ function practiceItems(entry: {
   return [];
 }
 
-function LockedActividadMessage({
-  moduloOrden,
-  moduloNombre,
-}: {
-  moduloOrden: number;
-  moduloNombre: string;
-}) {
-  return (
-    <FadeInUp delayMs={120}>
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-10 text-center dark:border-amber-900/50 dark:bg-amber-950/20">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-            <rect x="5" y="11" width="14" height="10" rx="2" />
-            <path d="M8 11V8a4 4 0 1 1 8 0v3" />
-          </svg>
-        </div>
-        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-          Módulo {moduloOrden} · {moduloNombre}
-        </h2>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-          Las actividades de este módulo se habilitan cuando completes el módulo correspondiente en
-          la sección Curso.
-        </p>
-      </div>
-    </FadeInUp>
-  );
-}
-
 export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPracticePanelProps) {
-  const { activeUser } = useSession();
-  const {
-    entries,
-    loading,
-    error,
-    findEntryByActividadId,
-    isActividadEnabled,
-    isActividadFinalized,
-    markActividadFinalized,
-  } = useActividadesCatalog();
+  const { entries, loading, error, findEntryByActividadId } = useActividadesCatalog();
 
   const [sql, setSql] = useState('');
   const [validating, setValidating] = useState(false);
   const [executing, setExecuting] = useState(false);
-  const [finalizing, setFinalizing] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
-  const [finalizeError, setFinalizeError] = useState<string | null>(null);
   const [validationResult, setValidationResult] = useState<SqlValidationResult | null>(null);
   const [result, setResult] = useState<SqlExecutionResult | null>(null);
 
   const activeActividadId = parseActividadSubNavId(activeSubNavId);
   const activeEntry = useMemo(() => {
     if (activeActividadId) return findEntryByActividadId(activeActividadId);
-    return entries.find((entry) => entry.moduloEnabled) ?? entries[0] ?? null;
+    return entries[0] ?? null;
   }, [activeActividadId, findEntryByActividadId, entries]);
 
   useEffect(() => {
@@ -103,7 +61,6 @@ export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPractice
     setResult(null);
     setValidationResult(null);
     setQueryError(null);
-    setFinalizeError(null);
   }, [activeEntry?.id]);
 
   const practiceMode = activeEntry
@@ -154,28 +111,6 @@ export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPractice
     }
   };
 
-  const handleFinalize = async () => {
-    if (!activeUser || !activeEntry || !activeEntry.moduloEnabled) return;
-
-    const items = practiceItems(activeEntry);
-    const totalPreguntas = Math.max(items.length, 1);
-
-    setFinalizing(true);
-    setFinalizeError(null);
-    try {
-      await actividadesAdapter.finalizeActividad(
-        activeUser.inscripcionId,
-        activeEntry.id,
-        totalPreguntas,
-      );
-      markActividadFinalized(activeEntry.id);
-    } catch (error) {
-      setFinalizeError(getApiErrorMessage(error, 'No se pudo finalizar la actividad.'));
-    } finally {
-      setFinalizing(false);
-    }
-  };
-
   if (loading) {
     return (
       <FadeInUp delayMs={120} className="py-16 text-center">
@@ -204,16 +139,6 @@ export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPractice
     );
   }
 
-  if (!isActividadEnabled(activeEntry.id)) {
-    return (
-      <LockedActividadMessage
-        moduloOrden={activeEntry.moduloOrden}
-        moduloNombre={activeEntry.moduloNombre}
-      />
-    );
-  }
-
-  const isFinalized = isActividadFinalized(activeEntry.id);
   const enunciados = practiceItems(activeEntry);
 
   return (
@@ -226,11 +151,6 @@ export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPractice
           <h2 className="mt-1 text-xl font-bold text-slate-900 dark:text-white">
             {activeEntry.nombre}
           </h2>
-          {isFinalized ? (
-            <span className="mt-2 inline-flex rounded-lg bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-              Actividad finalizada · 100%
-            </span>
-          ) : null}
         </div>
       </FadeInUp>
 
@@ -280,14 +200,6 @@ export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPractice
                   {executing ? 'Ejecutando...' : 'Realizar consulta'}
                 </button>
               ) : null}
-              <button
-                type="button"
-                onClick={() => void handleFinalize()}
-                disabled={finalizing || isFinalized}
-                className="inline-flex items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300 dark:hover:bg-emerald-950/50"
-              >
-                {finalizing ? 'Guardando...' : isFinalized ? 'Finalizada' : 'Finalizar'}
-              </button>
             </div>
           </div>
 
@@ -310,11 +222,6 @@ export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPractice
           {queryError ? (
             <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
               {queryError}
-            </p>
-          ) : null}
-          {finalizeError ? (
-            <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
-              {finalizeError}
             </p>
           ) : null}
         </section>

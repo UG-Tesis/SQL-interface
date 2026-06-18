@@ -141,7 +141,6 @@ export function FixedSidebar({
               return items.map((item, index) => {
               if (item.isGroupHeader) {
                 activityNumberInModule = 0;
-                const moduleEnabled = item.enabled !== false;
                 const isExpanded = !collapsibleModules || item.id === expandedModuleId;
 
                 return (
@@ -152,11 +151,9 @@ export function FixedSidebar({
                         onClick={() => handleModuleHeaderClick(item.id)}
                         aria-expanded={isExpanded}
                         className={`w-full rounded-xl border px-3 py-2.5 text-left transition-colors ${
-                          moduleEnabled
-                            ? isExpanded
-                              ? 'border-cyan-500/40 bg-white/8'
-                              : 'border-cyan-500/25 bg-white/5 hover:bg-white/8'
-                            : 'border-transparent bg-white/[0.02] opacity-80'
+                          isExpanded
+                            ? 'border-cyan-500/40 bg-white/8'
+                            : 'border-cyan-500/25 bg-white/5 hover:bg-white/8'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -178,28 +175,12 @@ export function FixedSidebar({
                             <path d="M6 9l6 6 6-6" />
                           </svg>
                         </div>
-                        {!moduleEnabled ? (
-                          <p className="mt-1 text-[11px] text-slate-500">
-                            Completa el módulo en Curso para habilitar
-                          </p>
-                        ) : null}
                       </button>
                     ) : (
-                      <div
-                        className={`rounded-xl border px-3 py-2.5 ${
-                          moduleEnabled
-                            ? 'border-cyan-500/25 bg-white/5'
-                            : 'border-transparent bg-white/[0.02] opacity-80'
-                        }`}
-                      >
+                      <div className="rounded-xl border border-cyan-500/25 bg-white/5 px-3 py-2.5">
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-cyan-300/90">
                           {item.label}
                         </p>
-                        {!moduleEnabled ? (
-                          <p className="mt-1 text-[11px] text-slate-500">
-                            Completa el módulo en Curso para habilitar
-                          </p>
-                        ) : null}
                       </div>
                     )}
                   </FadeInUp>
@@ -242,38 +223,14 @@ export function FixedSidebar({
                   >
                     <span
                       className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold tabular-nums transition-colors ${
-                        !isEnabled
-                          ? 'bg-white/5 text-slate-600'
-                          : isActive
-                            ? 'bg-cyan-500/30 text-cyan-100 ring-1 ring-cyan-400/40'
-                            : 'bg-white/5 text-slate-500 group-hover:bg-cyan-500/15 group-hover:text-cyan-200'
+                        isActive
+                          ? 'bg-cyan-500/30 text-cyan-100 ring-1 ring-cyan-400/40'
+                          : 'bg-white/5 text-slate-500 group-hover:bg-cyan-500/15 group-hover:text-cyan-200'
                       }`}
                     >
-                      {!isEnabled ? (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                          <rect x="5" y="11" width="14" height="10" rx="2" />
-                          <path d="M8 11V8a4 4 0 1 1 8 0v3" />
-                        </svg>
-                      ) : (
-                        String(activityNumberInModule)
-                      )}
+                      {String(activityNumberInModule)}
                     </span>
-                    <span className="leading-snug">
-                      {item.label}
-                      {item.completed ? (
-                        <span className="mt-1 block text-[11px] font-medium text-emerald-300/90">
-                          Completado · 100%
-                        </span>
-                      ) : !isEnabled ? (
-                        <span className="mt-1 block text-[11px] font-medium text-slate-500">
-                          Completa el módulo anterior
-                        </span>
-                      ) : (item.porcentaje ?? 0) > 0 ? (
-                        <span className="mt-1 block text-[11px] font-medium text-cyan-300/80">
-                          Avance {item.porcentaje}%
-                        </span>
-                      ) : null}
-                    </span>
+                    <span className="leading-snug">{item.label}</span>
                   </button>
                 </FadeInUp>
               );

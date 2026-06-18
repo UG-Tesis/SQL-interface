@@ -7,7 +7,7 @@ import type { SubNavItem } from '../../domain/models/SubNavItem';
 import { useActividadesCatalog } from '../session/ActividadesCatalogContext';
 
 export function useActividadSubNav(enabled: boolean) {
-  const { groups, loading, error, isActividadFinalized } = useActividadesCatalog();
+  const { groups, loading, error } = useActividadesCatalog();
 
   const items = useMemo<SubNavItem[]>(() => {
     if (!enabled) return [];
@@ -19,15 +19,12 @@ export function useActividadSubNav(enabled: boolean) {
         id: moduloActividadHeaderId(group.topicId),
         label: `Módulo ${group.orden} · ${group.nombre}`,
         isGroupHeader: true,
-        enabled: group.enabled,
       });
 
       if (group.actividades.length === 0) {
         navItems.push({
           id: `${moduloActividadHeaderId(group.topicId)}-empty`,
-          label: group.enabled
-            ? 'Sin actividades registradas'
-            : 'Disponible al completar el módulo anterior',
+          label: 'Sin actividades registradas',
           enabled: false,
           moduleGroupId: moduloActividadHeaderId(group.topicId),
         });
@@ -38,15 +35,13 @@ export function useActividadSubNav(enabled: boolean) {
         navItems.push({
           id: actividadSubNavId(actividad.id),
           label: actividad.nombre,
-          enabled: group.enabled,
-          completed: isActividadFinalized(actividad.id),
           moduleGroupId: moduloActividadHeaderId(group.topicId),
         });
       }
     }
 
     return navItems;
-  }, [enabled, groups, isActividadFinalized]);
+  }, [enabled, groups]);
 
   const firstItemId = useMemo(
     () => items.find((item) => !item.isGroupHeader && item.enabled !== false)?.id ?? null,
