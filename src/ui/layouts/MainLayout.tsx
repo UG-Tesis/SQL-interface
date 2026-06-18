@@ -2,19 +2,15 @@ import {
   cloneElement,
   isValidElement,
   useEffect,
-  useMemo,
-  useRef,
   useState,
   type ReactElement,
   type ReactNode,
 } from 'react';
 import type { Section, SectionId } from '../../domain/models/Section';
-import { CURSO_MODULE_DEFINITIONS } from '../../domain/config/cursoModules.config';
 import { SiteHeader } from '../components/SiteHeader';
 import { FixedSidebar } from '../components/FixedSidebar';
 import { useSubNav } from '../hooks/useSubNav';
 import { useActividadSubNav } from '../hooks/useActividadSubNav';
-import { useCursoProgress } from '../session/CursoProgressContext';
 import { APP_STORAGE_KEYS } from '../../infrastructure/storage/browserStorage';
 
 const SIDEBAR_COLLAPSED_KEY = APP_STORAGE_KEYS.sidebarCollapsed;
@@ -38,24 +34,8 @@ export function MainLayout({
   const isActividadSection = activeSection === 'actividad';
   const { items: actividadSubNavItems, firstItemId: firstActividadId } =
     useActividadSubNav(isActividadSection);
-  const baseSubNavItems = isActividadSection ? actividadSubNavItems : subNavItems;
-  const { getModuleAccess, progress, completingTopicId } = useCursoProgress();
-  const prevCompletingTopicId = useRef<string | null>(null);
-  const enrichedSubNavItems = useMemo(
-    () =>
-      activeSection === 'curso'
-        ? baseSubNavItems.map((item) => {
-            const access = getModuleAccess(item.id);
-            return {
-              ...item,
-              enabled: access?.enabled ?? item.id === 'c1',
-              completed: access?.completed ?? false,
-              porcentaje: access?.porcentaje ?? 0,
-            };
-          })
-        : baseSubNavItems,
-    [activeSection, baseSubNavItems, getModuleAccess],
-  );
+  const navItems = isActividadSection ? actividadSubNavItems : subNavItems;
+
   const [selectionBySection, setSelectionBySection] = useState<Partial<Record<SectionId, string>>>({});
   const [mobileSubNavOpen, setMobileSubNavOpen] = useState(false);
   const [sidebarDesktopCollapsed, setSidebarDesktopCollapsed] = useState(() => {
@@ -70,8 +50,8 @@ export function MainLayout({
     activeSection != null
       ? (selectionBySection[activeSection] ??
         (isActividadSection ? firstActividadId : null) ??
-        enrichedSubNavItems.find((item) => item.enabled !== false)?.id ??
-        enrichedSubNavItems[0]?.id ??
+        navItems.find((item) => item.enabled !== false)?.id ??
+        navItems[0]?.id ??
         null)
       : null;
 
@@ -87,54 +67,19 @@ export function MainLayout({
   }, [isActividadSection, firstActividadId, actividadSubNavItems.length, selectionBySection.actividad]);
 
   useEffect(() => {
-    if (!isActividadSection || enrichedSubNavItems.length === 0) return;
+    if (!isActividadSection || navItems.length === 0) return;
 
     const currentId = selectionBySection.actividad ?? firstActividadId;
-    const currentItem = enrichedSubNavItems.find((item) => item.id === currentId);
-    if (currentItem?.enabled === false || currentItem?.isGroupHeader) {
-      const firstEnabled = enrichedSubNavItems.find(
-        (item) => !item.isGroupHeader && item.enabled !== false && !item.id.endsWith('-empty'),
+    const currentItem = navItems.find((item) => item.id === currentId);
+    if (currentItem?.isGroupHeader || currentItem?.id.endsWith('-empty')) {
+      const firstSelectable = navItems.find(
+        (item) => !item.isGroupHeader && !item.id.endsWith('-empty'),
       );
-      if (firstEnabled) {
-        setSelectionBySection((prev) => ({ ...prev, actividad: firstEnabled.id }));
+      if (firstSelectable) {
+        setSelectionBySection((prev) => ({ ...prev, actividad: firstSelectable.id }));
       }
     }
-  }, [isActividadSection, enrichedSubNavItems, selectionBySection.actividad, firstActividadId]);
-
-  useEffect(() => {
-    if (activeSection !== 'curso' || enrichedSubNavItems.length === 0) return;
-
-    const currentId = selectionBySection.curso ?? enrichedSubNavItems[0]?.id;
-    const currentItem = enrichedSubNavItems.find((item) => item.id === currentId);
-    if (currentItem?.enabled === false) {
-      const firstEnabled = enrichedSubNavItems.find((item) => item.enabled !== false);
-      if (firstEnabled) {
-        setSelectionBySection((prev) => ({ ...prev, curso: firstEnabled.id }));
-      }
-    }
-  }, [activeSection, enrichedSubNavItems, selectionBySection.curso]);
-
-  useEffect(() => {
-    if (activeSection !== 'curso' || !progress) return;
-
-    const justFinished = prevCompletingTopicId.current;
-    if (justFinished && !completingTopicId) {
-      const completedIndex = CURSO_MODULE_DEFINITIONS.findIndex(
-        (module) => module.topicId === justFinished,
-      );
-      const nextDefinition = CURSO_MODULE_DEFINITIONS[completedIndex + 1];
-      if (nextDefinition) {
-        const nextAccess = progress.modules.find(
-          (module) => module.topicId === nextDefinition.topicId,
-        );
-        if (nextAccess?.enabled) {
-          setSelectionBySection((prev) => ({ ...prev, curso: nextDefinition.topicId }));
-        }
-      }
-    }
-
-    prevCompletingTopicId.current = completingTopicId;
-  }, [activeSection, completingTopicId, progress]);
+  }, [isActividadSection, navItems, selectionBySection.actividad, firstActividadId]);
 
   useEffect(() => {
     try {
@@ -172,13 +117,9 @@ export function MainLayout({
   }, []);
 
   const handleSubNavChange = (id: string) => {
-    if (activeSection === 'curso') {
-      const target = enrichedSubNavItems.find((item) => item.id === id);
-      if (target?.enabled === false) return;
-    }
     if (activeSection === 'actividad') {
-      const target = enrichedSubNavItems.find((item) => item.id === id);
-      if (target?.isGroupHeader || target?.enabled === false || target?.id.endsWith('-empty')) {
+      const target = navItems.find((item) => item.id === id);
+      if (target?.isGroupHeader || target?.id.endsWith('-empty')) {
         return;
       }
     }
@@ -221,7 +162,7 @@ export function MainLayout({
       {showSidebar ? (
         <FixedSidebar
           key={activeSection}
-          items={enrichedSubNavItems}
+          items={navItems}
           activeId={activeSubNavId}
           onActiveIdChange={handleSubNavChange}
           mobileOpen={mobileSubNavOpen}

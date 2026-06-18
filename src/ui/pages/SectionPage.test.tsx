@@ -2,9 +2,7 @@ import { render, screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import { describe, expect, it } from 'vitest';
 import type { Topic } from '../../domain/models/Topic';
-import { CursoProgressProvider } from '../session/CursoProgressContext';
 import { ActividadesCatalogProvider } from '../session/ActividadesCatalogContext';
-import { SessionProvider } from '../session/SessionContext';
 import { SectionPage } from './SectionPage';
 
 const sampleTopics: Topic[] = [
@@ -26,13 +24,9 @@ const sampleTopics: Topic[] = [
 
 function renderSectionPage(props: ComponentProps<typeof SectionPage>) {
   return render(
-    <SessionProvider>
-      <CursoProgressProvider>
-        <ActividadesCatalogProvider>
-          <SectionPage {...props} />
-        </ActividadesCatalogProvider>
-      </CursoProgressProvider>
-    </SessionProvider>,
+    <ActividadesCatalogProvider>
+      <SectionPage {...props} />
+    </ActividadesCatalogProvider>,
   );
 }
 

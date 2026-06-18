@@ -1,10 +1,8 @@
-import { useNavigate } from 'react-router-dom';
 import type { Section, SectionId } from '../../domain/models/Section';
 import { FadeInUp } from '../components/FadeInUp';
 import { PageBackdrop } from '../components/PageBackdrop';
 import { SectionCard } from '../components/SectionCard';
 import { SiteHeader } from '../components/SiteHeader';
-import { useSession } from '../session/SessionContext';
 
 interface DashboardPageProps {
   sections: Section[];
@@ -12,14 +10,7 @@ interface DashboardPageProps {
   onNavigateToHome: () => void;
 }
 
-function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat('es-EC', { dateStyle: 'medium' }).format(new Date(iso));
-}
-
 export function DashboardPage({ sections, onNavigate, onNavigateToHome }: DashboardPageProps) {
-  const navigate = useNavigate();
-  const { activeUser } = useSession();
-
   return (
     <div className="relative flex min-h-screen flex-col dark:bg-slate-950">
       <PageBackdrop />
@@ -32,32 +23,6 @@ export function DashboardPage({ sections, onNavigate, onNavigateToHome }: Dashbo
 
       <main className="relative z-10 flex flex-1 flex-col px-4 py-10 sm:px-6 sm:py-12 md:py-14">
         <div className="mx-auto w-full max-w-6xl">
-          {activeUser ? (
-            <FadeInUp delayMs={60}>
-              <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-cyan-200/80 bg-cyan-50/70 px-4 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-cyan-900/50 dark:bg-cyan-950/20">
-                <div>
-                  <p className="text-sm font-medium text-cyan-800 dark:text-cyan-300">
-                    Sesión activa
-                  </p>
-                  <p className="text-lg font-semibold text-slate-900 dark:text-white">
-                    {activeUser.nombre} {activeUser.apellido}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    ID {activeUser.personaId} · Inscripción {activeUser.inscripcionId} ·{' '}
-                    {formatDate(activeUser.fechaRegistro)}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => void navigate('/', { state: { openEntry: true } })}
-                  className="rounded-lg border border-cyan-300 px-4 py-2 text-sm font-medium text-cyan-800 transition hover:bg-cyan-100 dark:border-cyan-800 dark:text-cyan-300 dark:hover:bg-cyan-950/40"
-                >
-                  Cambiar usuario
-                </button>
-              </div>
-            </FadeInUp>
-          ) : null}
-
           <div className="mb-10 text-center md:mb-14">
             <FadeInUp delayMs={100}>
               <h1 className="text-5xl font-extrabold tracking-tight text-cyan-600 dark:text-cyan-400 sm:text-6xl md:text-7xl">

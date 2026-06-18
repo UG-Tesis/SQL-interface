@@ -10,10 +10,13 @@ import {
 import type { ActividadCatalogEntry } from '../../domain/models/ActividadModuloGroup';
 import type { ActividadModuloGroup } from '../../domain/models/ActividadModuloGroup';
 import { HttpActividadesAdapter } from '../../infrastructure/adapters/HttpActividadesAdapter';
-import { useCursoProgress } from './CursoProgressContext';
-import { useSession } from './SessionContext';
+import { apiRequest } from '../../infrastructure/api/apiClient';
 
 const actividadesAdapter = new HttpActividadesAdapter();
+
+interface CursoResponse {
+  id: number;
+}
 
 interface ActividadesCatalogContextValue {
   groups: ActividadModuloGroup[];
@@ -22,73 +25,47 @@ interface ActividadesCatalogContextValue {
   error: string | null;
   refreshCatalog: () => Promise<void>;
   findEntryByActividadId: (actividadId: number) => ActividadCatalogEntry | undefined;
-  isActividadEnabled: (actividadId: number) => boolean;
-  isActividadFinalized: (actividadId: number) => boolean;
-  markActividadFinalized: (actividadId: number) => void;
 }
 
 const ActividadesCatalogContext = createContext<ActividadesCatalogContextValue | null>(null);
 
+async function resolveDefaultCursoId(): Promise<number> {
+  const cursos = await apiRequest<CursoResponse[]>('/cursos');
+  if (cursos.length === 0) {
+    throw new Error('No hay cursos disponibles.');
+  }
+  return cursos[0].id;
+}
+
 export function ActividadesCatalogProvider({ children }: { children: ReactNode }) {
-  const { activeUser } = useSession();
-  const { progress, isModuleEnabled } = useCursoProgress();
-  const [rawGroups, setRawGroups] = useState<ActividadModuloGroup[]>([]);
-  const [finalizedIds, setFinalizedIds] = useState<Set<number>>(new Set());
+  const [groups, setGroups] = useState<ActividadModuloGroup[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const cursoId = progress?.cursoId ?? activeUser?.cursoId ?? null;
-
   const refreshCatalog = useCallback(async () => {
-    if (!activeUser || !cursoId) {
-      setRawGroups([]);
-      setFinalizedIds(new Set());
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
     try {
+      const cursoId = await resolveDefaultCursoId();
       const catalog = await actividadesAdapter.getActividadesCatalog(cursoId);
-      const finalized = new Set<number>();
-
-      await Promise.all(
-        catalog.flatMap((group) =>
-          group.actividades.map(async (actividad) => {
-            const done = await actividadesAdapter.isActividadFinalizada(
-              activeUser.inscripcionId,
-              actividad.id,
-            );
-            if (done) finalized.add(actividad.id);
-          }),
-        ),
+      setGroups(
+        catalog.map((group) => ({
+          ...group,
+          enabled: true,
+        })),
       );
-
-      setRawGroups(catalog);
-      setFinalizedIds(finalized);
     } catch {
-      setRawGroups([]);
-      setFinalizedIds(new Set());
+      setGroups([]);
       setError('No se pudieron cargar las actividades por módulo.');
     } finally {
       setLoading(false);
     }
-  }, [activeUser, cursoId]);
+  }, []);
 
   useEffect(() => {
     void refreshCatalog();
   }, [refreshCatalog]);
-
-  const groups = useMemo(
-    () =>
-      rawGroups.map((group) => ({
-        ...group,
-        enabled: isModuleEnabled(group.topicId),
-      })),
-    [rawGroups, isModuleEnabled],
-  );
 
   const entries = useMemo<ActividadCatalogEntry[]>(
     () =>
@@ -98,31 +75,15 @@ export function ActividadesCatalogProvider({ children }: { children: ReactNode }
           topicId: group.topicId,
           moduloOrden: group.orden,
           moduloNombre: group.nombre,
-          moduloEnabled: group.enabled,
-          finalized: finalizedIds.has(actividad.id),
         })),
       ),
-    [groups, finalizedIds],
+    [groups],
   );
 
   const findEntryByActividadId = useCallback(
     (actividadId: number) => entries.find((entry) => entry.id === actividadId),
     [entries],
   );
-
-  const isActividadEnabled = useCallback(
-    (actividadId: number) => findEntryByActividadId(actividadId)?.moduloEnabled ?? false,
-    [findEntryByActividadId],
-  );
-
-  const isActividadFinalized = useCallback(
-    (actividadId: number) => finalizedIds.has(actividadId),
-    [finalizedIds],
-  );
-
-  const markActividadFinalized = useCallback((actividadId: number) => {
-    setFinalizedIds((prev) => new Set(prev).add(actividadId));
-  }, []);
 
   const value = useMemo(
     () => ({
@@ -132,21 +93,8 @@ export function ActividadesCatalogProvider({ children }: { children: ReactNode }
       error,
       refreshCatalog,
       findEntryByActividadId,
-      isActividadEnabled,
-      isActividadFinalized,
-      markActividadFinalized,
     }),
-    [
-      groups,
-      entries,
-      loading,
-      error,
-      refreshCatalog,
-      findEntryByActividadId,
-      isActividadEnabled,
-      isActividadFinalized,
-      markActividadFinalized,
-    ],
+    [groups, entries, loading, error, refreshCatalog, findEntryByActividadId],
   );
 
   return (

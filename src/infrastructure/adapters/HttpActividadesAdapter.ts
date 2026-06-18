@@ -1,7 +1,7 @@
 import { CURSO_MODULE_DEFINITIONS } from '../../domain/config/cursoModules.config';
 import type { ActividadModuloGroup } from '../../domain/models/ActividadModuloGroup';
 import type { ActividadPractica, PreguntaPractica } from '../../domain/models/ActividadPractica';
-import type { ActividadesPort, ActividadProgressPort } from '../../domain/ports/ActividadesPort';
+import type { ActividadesPort } from '../../domain/ports/ActividadesPort';
 import { apiRequest } from '../api/apiClient';
 
 interface ModuloResponse {
@@ -28,15 +28,7 @@ interface ActividadResponse {
   preguntas?: PreguntaResponse[];
 }
 
-interface AvanceActividadResponse {
-  id: number;
-  inscripcion_id: number;
-  actividad_id: number;
-  finalizado: boolean | null;
-  porcentaje: string | number | null;
-}
-
-export class HttpActividadesAdapter implements ActividadesPort, ActividadProgressPort {
+export class HttpActividadesAdapter implements ActividadesPort {
   async resolveModuloIdByOrden(cursoId: number, orden: number): Promise<number | null> {
     const modulos = await apiRequest<ModuloResponse[]>(`/modulos?cursoId=${cursoId}`);
     const modulo = modulos.find((item) => item.orden === orden);
@@ -69,7 +61,7 @@ export class HttpActividadesAdapter implements ActividadesPort, ActividadProgres
           orden: moduleDef.orden,
           moduloId: 0,
           nombre: moduleDef.nombre,
-          enabled: moduleDef.orden === 1,
+          enabled: true,
           actividades: [],
         });
         continue;
@@ -81,57 +73,12 @@ export class HttpActividadesAdapter implements ActividadesPort, ActividadProgres
         orden: moduleDef.orden,
         moduloId: modulo.id,
         nombre: moduleDef.nombre,
-        enabled: false,
+        enabled: true,
         actividades,
       });
     }
 
     return groups;
-  }
-
-  async isActividadFinalizada(inscripcionId: number, actividadId: number): Promise<boolean> {
-    const avances = await apiRequest<AvanceActividadResponse[]>(
-      `/progreso/actividades?inscripcionId=${inscripcionId}`,
-    );
-    const avance = avances.find((item) => item.actividad_id === actividadId);
-    if (!avance) return false;
-    const porcentaje = Number(avance.porcentaje ?? 0);
-    return Boolean(avance.finalizado) || porcentaje >= 100;
-  }
-
-  async finalizeActividad(
-    inscripcionId: number,
-    actividadId: number,
-    totalPreguntas: number,
-  ): Promise<void> {
-    const avances = await apiRequest<AvanceActividadResponse[]>(
-      `/progreso/actividades?inscripcionId=${inscripcionId}`,
-    );
-    const existing = avances.find((item) => item.actividad_id === actividadId);
-
-    const payload = {
-      finalizado: true,
-      totalPreguntas,
-      preguntasRespondidas: totalPreguntas,
-      porcentaje: 100,
-    };
-
-    if (existing) {
-      await apiRequest(`/progreso/actividades/${existing.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(payload),
-      });
-      return;
-    }
-
-    await apiRequest('/progreso/actividades', {
-      method: 'POST',
-      body: JSON.stringify({
-        inscripcionId,
-        actividadId,
-        ...payload,
-      }),
-    });
   }
 
   private mapActividad(item: ActividadResponse): ActividadPractica {

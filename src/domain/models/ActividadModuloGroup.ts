@@ -13,6 +13,4 @@ export interface ActividadCatalogEntry extends ActividadPractica {
   topicId: string;
   moduloOrden: number;
   moduloNombre: string;
-  moduloEnabled: boolean;
-  finalized: boolean;
 }
