@@ -51,6 +51,6 @@ describe('alineación de navegación (adaptadores en memoria)', () => {
 describe('orden esperado del curso (c1–c5)', () => {
   it('mantiene la secuencia didáctica del módulo curso', () => {
     const cursoIds = subNavAdapter.getItemsBySection('curso').map((item) => item.id);
-    expect(cursoIds).toEqual(['c1', 'c3', 'c2', 'c4', 'c5']);
+    expect(cursoIds).toEqual(['c1', 'c2', 'c3', 'c4', 'c5']);
   });
 });
