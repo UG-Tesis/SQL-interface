@@ -2,7 +2,7 @@ import { CURSO_MODULE_DEFINITIONS } from '../../domain/config/cursoModules.confi
 import type { ActividadModuloGroup } from '../../domain/models/ActividadModuloGroup';
 import type { ActividadPractica, PreguntaPractica } from '../../domain/models/ActividadPractica';
 import type { ActividadesPort } from '../../domain/ports/ActividadesPort';
-import { apiRequest } from '../api/apiClient';
+import { ApiError, apiRequest } from '../api/apiClient';
 
 interface ModuloResponse {
   id: number;
@@ -28,6 +28,15 @@ interface ActividadResponse {
   preguntas?: PreguntaResponse[];
 }
 
+interface CursoSummaryResponse {
+  id: number;
+}
+
+interface CursoCatalogResponse {
+  id: number;
+  modulos: (ModuloResponse & { actividades: ActividadResponse[] })[];
+}
+
 export class HttpActividadesAdapter implements ActividadesPort {
   async resolveModuloIdByOrden(cursoId: number, orden: number): Promise<number | null> {
     const modulos = await apiRequest<ModuloResponse[]>(`/modulos?cursoId=${cursoId}`);
@@ -46,8 +55,30 @@ export class HttpActividadesAdapter implements ActividadesPort {
       .map((item) => this.mapActividad(item));
   }
 
-  async getActividadesCatalog(cursoId: number): Promise<ActividadModuloGroup[]> {
-    const modulos = await apiRequest<ModuloResponse[]>(`/modulos?cursoId=${cursoId}`);
+  async getActividadesCatalog(): Promise<ActividadModuloGroup[]> {
+    try {
+      const curso = await apiRequest<CursoCatalogResponse>('/cursos/catalog');
+      return this.buildGroupsFromModulos(curso.modulos);
+    } catch (error) {
+      // Railway u otros entornos sin desplegar /cursos/catalog interpretan "catalog" como :id → 400.
+      if (error instanceof ApiError && (error.status === 400 || error.status === 404)) {
+        return this.getActividadesCatalogFallback();
+      }
+      throw error;
+    }
+  }
+
+  private async getActividadesCatalogFallback(): Promise<ActividadModuloGroup[]> {
+    const cursos = await apiRequest<CursoSummaryResponse[]>('/cursos');
+    if (cursos.length === 0) {
+      throw new Error('No hay cursos disponibles.');
+    }
+
+    const curso = await apiRequest<CursoCatalogResponse>(`/cursos/${cursos[0].id}`);
+    return this.buildGroupsFromModulos(curso.modulos);
+  }
+
+  private buildGroupsFromModulos(modulos: (ModuloResponse & { actividades: ActividadResponse[] })[]) {
     const groups: ActividadModuloGroup[] = [];
 
     for (const moduleDef of CURSO_MODULE_DEFINITIONS) {
@@ -67,7 +98,11 @@ export class HttpActividadesAdapter implements ActividadesPort {
         continue;
       }
 
-      const actividades = await this.getActividadesByModuloId(modulo.id);
+      const actividades = modulo.actividades
+        .filter((item) => item.activo !== false)
+        .sort((a, b) => a.orden - b.orden)
+        .map((item) => this.mapActividad(item));
+
       groups.push({
         topicId: moduleDef.topicId,
         orden: moduleDef.orden,

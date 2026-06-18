@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   getActividadPracticeMode,
   getEditorPlaceholder,
@@ -67,7 +67,7 @@ function validationTitleClass(
   return 'text-red-800 dark:text-red-300';
 }
 
-function ValidationSidebar({
+const ValidationSidebar = memo(function ValidationSidebar({
   isModuleOne,
   moduloOrden,
   liveValidating,
@@ -129,10 +129,15 @@ function ValidationSidebar({
       </div>
     </aside>
   );
-}
+});
 
 export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPracticePanelProps) {
-  const { entries, loading, error, findEntryByActividadId } = useActividadesCatalog();
+  const { entries, loading, error, findEntryByActividadId, ensureCatalog } = useActividadesCatalog();
+  const liveValidationAbortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    void ensureCatalog();
+  }, [ensureCatalog]);
 
   const [sql, setSql] = useState('');
   const [validating, setValidating] = useState(false);
@@ -196,16 +201,22 @@ export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPractice
 
     let cancelled = false;
     setLiveValidating(true);
+    liveValidationAbortRef.current?.abort();
+    const controller = new AbortController();
+    liveValidationAbortRef.current = controller;
 
     const timer = window.setTimeout(() => {
       void (async () => {
         try {
-          const validation = await sqlValidationAdapter.validate(statement, activeEntry.id);
+          const validation = await sqlValidationAdapter.validate(statement, activeEntry.id, {
+            signal: controller.signal,
+          });
           if (!cancelled) {
             setValidationResult(validation);
             setFeedbackMode('live');
           }
-        } catch {
+        } catch (error) {
+          if (error instanceof DOMException && error.name === 'AbortError') return;
           if (!cancelled) setValidationResult(null);
         } finally {
           if (!cancelled) setLiveValidating(false);
@@ -215,6 +226,7 @@ export function ActividadesPracticePanel({ activeSubNavId }: ActividadesPractice
 
     return () => {
       cancelled = true;
+      controller.abort();
       window.clearTimeout(timer);
     };
   }, [sql, activeEntry, isModuleOne]);

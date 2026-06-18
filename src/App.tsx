@@ -1,12 +1,23 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import type { SectionId } from './domain/models/Section';
 import { isSectionId } from './domain/models/Section';
-import { MainLayout } from './ui/layouts/MainLayout';
-import { DashboardPage } from './ui/pages/DashboardPage';
-import { LandingPage } from './ui/pages/LandingPage';
-import { SectionPage } from './ui/pages/SectionPage';
+import { RouteLoader } from './ui/components/RouteLoader';
 import { useSections } from './ui/hooks/useSections';
 import { useTopics } from './ui/hooks/useTopics';
+
+const LandingPage = lazy(() =>
+  import('./ui/pages/LandingPage').then((module) => ({ default: module.LandingPage })),
+);
+const DashboardPage = lazy(() =>
+  import('./ui/pages/DashboardPage').then((module) => ({ default: module.DashboardPage })),
+);
+const MainLayout = lazy(() =>
+  import('./ui/layouts/MainLayout').then((module) => ({ default: module.MainLayout })),
+);
+const SectionPage = lazy(() =>
+  import('./ui/pages/SectionPage').then((module) => ({ default: module.SectionPage })),
+);
 
 function DashboardRoute() {
   const { sections } = useSections();
@@ -45,12 +56,14 @@ function SectionRoute() {
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/inicio" element={<DashboardRoute />} />
-      <Route path="/:sectionId" element={<SectionRoute />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Suspense fallback={<RouteLoader />}>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/inicio" element={<DashboardRoute />} />
+        <Route path="/:sectionId" element={<SectionRoute />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 

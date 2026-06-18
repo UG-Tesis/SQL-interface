@@ -3,6 +3,6 @@ import type { ActividadModuloGroup } from '../models/ActividadModuloGroup';
 
 export interface ActividadesPort {
   getActividadesByModuloId(moduloId: number): Promise<ActividadPractica[]>;
-  getActividadesCatalog(cursoId: number): Promise<ActividadModuloGroup[]>;
+  getActividadesCatalog(): Promise<ActividadModuloGroup[]>;
   resolveModuloIdByOrden(cursoId: number, orden: number): Promise<number | null>;
 }

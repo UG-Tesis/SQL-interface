@@ -1,10 +1,16 @@
-import { useMemo } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 import type { SectionId } from '../../domain/models/Section';
 import type { Topic } from '../../domain/models/Topic';
-import { ActividadesPracticePanel } from '../components/ActividadesPracticePanel';
 import { FadeInUp } from '../components/FadeInUp';
 import { PageBackdrop } from '../components/PageBackdrop';
+import { RouteLoader } from '../components/RouteLoader';
 import { TopicCard } from '../components/TopicCard';
+
+const ActividadesPracticePanel = lazy(() =>
+  import('../components/ActividadesPracticePanel').then((module) => ({
+    default: module.ActividadesPracticePanel,
+  })),
+);
 
 interface SectionPageProps {
   sectionId: SectionId;
@@ -38,7 +44,9 @@ export function SectionPage({ sectionId, topics, activeSubNavId }: SectionPagePr
           }`}
         >
           {sectionId === 'actividad' ? (
-            <ActividadesPracticePanel activeSubNavId={activeSubNavId} />
+            <Suspense fallback={<RouteLoader />}>
+              <ActividadesPracticePanel activeSubNavId={activeSubNavId} />
+            </Suspense>
           ) : visibleTopics.length > 0 ? (
             visibleTopics.map((topic, index) => (
               <FadeInUp key={topic.id} delayMs={120 + index * 110}>

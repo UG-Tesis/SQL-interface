@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   actividadSubNavId,
   moduloActividadHeaderId,
@@ -7,7 +7,12 @@ import type { SubNavItem } from '../../domain/models/SubNavItem';
 import { useActividadesCatalog } from '../session/ActividadesCatalogContext';
 
 export function useActividadSubNav(enabled: boolean) {
-  const { groups, loading, error } = useActividadesCatalog();
+  const { groups, loading, error, ensureCatalog } = useActividadesCatalog();
+
+  useEffect(() => {
+    if (!enabled) return;
+    void ensureCatalog();
+  }, [enabled, ensureCatalog]);
 
   const items = useMemo<SubNavItem[]>(() => {
     if (!enabled) return [];
