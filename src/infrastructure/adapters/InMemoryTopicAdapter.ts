@@ -66,22 +66,13 @@ const TOPICS: Topic[] = [
     content:
       'Ejercicio: Selecciona los empleados cuyo salario sea mayor a 1500 y que pertenezcan al departamento "Ventas".',
   },
-  // Evaluaciones
+  // Juegos — Misterio SQL
   {
-    id: 'evaluacion-1',
-    sectionId: 'evaluacion',
-    title: 'Evaluación - Consultas básicas',
-    description: 'Demuestra tus conocimientos en SELECT y WHERE.',
-    content:
-      'Pregunta 1: ¿Cuál es la sintaxis correcta para seleccionar todas las columnas de una tabla llamada "empleados"?\n\nA) SELECT empleados\nB) SELECT * FROM empleados\nC) GET * FROM empleados\nD) SELECT ALL empleados',
-  },
-  {
-    id: 'evaluacion-2',
-    sectionId: 'evaluacion',
-    title: 'Evaluación - Manipulación de datos',
-    description: 'Evalúa tus habilidades con INSERT, UPDATE y DELETE.',
-    content:
-      'Pregunta 1: ¿Cuál sentencia se usa para agregar nuevos registros?\n\nA) ADD INTO\nB) INSERT INTO\nC) CREATE ROW\nD) NEW RECORD',
+    id: 'juego-misterio-experto',
+    sectionId: 'juegos',
+    title: 'Misterio SQL — Modo experto',
+    description: 'Investiga libremente con guía de inicio y mapa de tablas.',
+    content: '',
   },
 ];
 

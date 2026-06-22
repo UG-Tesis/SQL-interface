@@ -11,6 +11,12 @@ const ActividadesPracticePanel = lazy(() =>
   })),
 );
 
+const MisterioGamePanel = lazy(() =>
+  import('../components/MisterioGamePanel').then((module) => ({
+    default: module.MisterioGamePanel,
+  })),
+);
+
 interface SectionPageProps {
   sectionId: SectionId;
   topics: Topic[];
@@ -31,6 +37,7 @@ export function SectionPage({ sectionId, topics, activeSubNavId }: SectionPagePr
     visibleTopics.length === 1 &&
     wideCursoTopicIds.has(visibleTopics[0]?.id ?? '');
   const isActividadesLayout = sectionId === 'actividad';
+  const isJuegosLayout = sectionId === 'juegos';
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -39,12 +46,18 @@ export function SectionPage({ sectionId, topics, activeSubNavId }: SectionPagePr
       <div className="relative z-10 flex flex-1 flex-col px-4 py-8 sm:px-6 md:px-8 md:py-10">
         <div
           className={`mx-auto w-full space-y-6 ${
-            isActividadesLayout || isCursoWideLayout ? 'max-w-6xl xl:max-w-7xl' : 'max-w-3xl'
+            isActividadesLayout || isJuegosLayout || isCursoWideLayout
+              ? 'max-w-6xl xl:max-w-7xl'
+              : 'max-w-3xl'
           }`}
         >
           {sectionId === 'actividad' ? (
             <Suspense fallback={<RouteLoader />}>
               <ActividadesPracticePanel activeSubNavId={activeSubNavId} />
+            </Suspense>
+          ) : sectionId === 'juegos' ? (
+            <Suspense fallback={<RouteLoader />}>
+              <MisterioGamePanel activeSubNavId={activeSubNavId} />
             </Suspense>
           ) : visibleTopics.length > 0 ? (
             visibleTopics.map((topic) => <TopicCard key={topic.id} topic={topic} />)

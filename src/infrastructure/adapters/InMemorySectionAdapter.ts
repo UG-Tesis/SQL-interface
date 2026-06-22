@@ -15,10 +15,11 @@ const SECTIONS: Section[] = [
     icon: '✏️',
   },
   {
-    id: 'evaluacion',
-    title: 'Evaluación',
-    description: 'Pon a prueba tus conocimientos con evaluaciones y obtén retroalimentación.',
-    icon: '📝',
+    id: 'juegos',
+    title: 'Juegos',
+    description:
+      'Resuelve el Misterio SQL: investiga un crimen con consultas y descubre al culpable.',
+    icon: '🎮',
   },
 ];
 

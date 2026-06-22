@@ -46,12 +46,14 @@ export function NavIconPencil({ className }: { className?: string }) {
   );
 }
 
-/** Documento / evaluación */
-export function NavIconClipboard({ className }: { className?: string }) {
+/** Control / juegos */
+export function NavIconGamepad({ className }: { className?: string }) {
   return (
     <svg {...iconProps(className)}>
-      <path d="M9 2h6a1 1 0 0 1 1 1v1h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V3a1 1 0 0 1 1-1z" />
-      <path d="M8 10h8M8 14h6" />
+      <path d="M6 11h4M8 9v4" />
+      <path d="M15 12h.01" />
+      <path d="M18 10h.01" />
+      <rect x="2" y="6" width="20" height="12" rx="4" />
     </svg>
   );
 }
@@ -62,8 +64,8 @@ export function SectionNavIcon({ sectionId, className }: { sectionId: SectionId;
       return <NavIconBookOpen className={className} />;
     case 'actividad':
       return <NavIconPencil className={className} />;
-    case 'evaluacion':
-      return <NavIconClipboard className={className} />;
+    case 'juegos':
+      return <NavIconGamepad className={className} />;
     default:
       return null;
   }
