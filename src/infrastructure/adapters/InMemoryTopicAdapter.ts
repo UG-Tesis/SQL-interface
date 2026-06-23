@@ -70,7 +70,7 @@ const TOPICS: Topic[] = [
   {
     id: 'juego-misterio-experto',
     sectionId: 'juegos',
-    title: 'Misterio SQL — Modo experto',
+    title: 'Misterio SQL',
     description: 'Investiga libremente con guía de inicio y mapa de tablas.',
     content: '',
   },

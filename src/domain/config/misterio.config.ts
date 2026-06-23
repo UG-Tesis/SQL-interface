@@ -128,6 +128,42 @@ export function getMisterioGameMode(): 'experto' {
 export const MISTERIO_INTRO =
   '¡Ha ocurrido un asesinato en Ciudad SQL! Eres el detective: toda la evidencia está en tablas de MySQL. Usa consultas SQL para investigar y descubrir quién cometió el crimen y quién lo planeó.';
 
+export const MISTERIO_CASE_TITLE = 'Asesinato en Ciudad SQL';
+
+export const MISTERIO_CASE_NARRATIVE =
+  'Se ha cometido un crimen y el detective necesita tu ayuda. El detective te entregó el informe de la escena del crimen, pero de alguna manera lo perdiste. Recuerdas vagamente que el crimen fue un asesinato que ocurrió el 15 de enero de 2018 en Ciudad SQL. Empieza recuperando el informe correspondiente de la escena del crimen en la base de datos del departamento de policía.';
+
+export const MISTERIO_INVESTIGATION_FLOW = [
+  {
+    step: 1,
+    label: 'Informe policial',
+    table: 'informe_escena_crimen',
+    description:
+      'Busca el asesinato del 15/01/2018 en Ciudad SQL. En la descripción encontrarás pistas sobre los testigos.',
+  },
+  {
+    step: 2,
+    label: 'Testigos',
+    table: 'persona',
+    description:
+      'Identifica a los testigos por nombre y dirección (Anabel en Franklin Ave, otro en Northwestern Dr).',
+  },
+  {
+    step: 3,
+    label: 'Entrevistas y registros',
+    table: 'entrevista',
+    description:
+      'Lee las declaraciones y cruza con el gimnasio (9/01/2018) u otras tablas según las pistas.',
+  },
+  {
+    step: 4,
+    label: 'Verificar sospechoso',
+    table: 'solucion',
+    description:
+      'Cuando tengas un nombre, entrega tu respuesta con INSERT INTO solucion VALUES (1, \'Nombre Apellido\').',
+  },
+] as const;
+
 export const MISTERIO_EXPERT_BLOCKS: MisterioExpertBlock[] = [
   {
     id: 'explorar-tablas',
@@ -141,7 +177,11 @@ ORDER BY TABLE_NAME`,
   {
     id: 'columnas-informe',
     title: 'Ver columnas del informe policial',
-    body: 'Muestra la estructura de informe_escena_crimen (fecha, tipo, descripcion, ciudad).',
-    defaultSql: 'SHOW CREATE TABLE informe_escena_crimen',
+    body: 'Lista las columnas de informe_escena_crimen (fecha, tipo, descripcion, ciudad).',
+    defaultSql: `SELECT COLUMN_NAME AS columna, DATA_TYPE AS tipo
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'tesis_misterio'
+  AND TABLE_NAME = 'informe_escena_crimen'
+ORDER BY ORDINAL_POSITION`,
   },
 ];

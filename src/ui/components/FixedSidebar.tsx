@@ -225,7 +225,7 @@ export function FixedSidebar({
                   onClick={() => {
                     if (isEnabled) onActiveIdChange(item.id);
                   }}
-                  className={`group flex w-full items-start gap-3 rounded-xl border px-3 py-2.5 text-left text-sm opacity-100 transition-colors duration-150 ${
+                  className={`group flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-sm opacity-100 transition-colors duration-150 ${
                     !isEnabled
                       ? 'cursor-not-allowed border-transparent text-slate-500/70'
                       : isActive
@@ -234,7 +234,7 @@ export function FixedSidebar({
                   }`}
                 >
                   <span
-                    className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold tabular-nums transition-colors ${
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold tabular-nums transition-colors ${
                       isActive
                         ? 'bg-cyan-500/30 text-cyan-100 ring-1 ring-cyan-400/40'
                         : 'bg-white/5 text-slate-500 group-hover:bg-cyan-500/15 group-hover:text-cyan-200'
@@ -242,7 +242,7 @@ export function FixedSidebar({
                   >
                     {String(activityNumber)}
                   </span>
-                  <span className="leading-snug">{item.label}</span>
+                  <span className="min-w-0 flex-1 leading-snug">{item.label}</span>
                 </button>
               );
             })}

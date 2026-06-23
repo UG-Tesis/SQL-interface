@@ -38,7 +38,9 @@ export function MisterioSqlWorkspace({
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Editor SQL</h3>
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+          Consola de investigación
+        </h3>
         <div className="flex flex-wrap items-center gap-2">
           {showSolutionButton && onShowSolution ? (
             <button

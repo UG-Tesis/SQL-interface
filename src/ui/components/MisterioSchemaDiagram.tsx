@@ -298,19 +298,27 @@ const RELATIONS: RelationLine[] = (() => {
   ];
 })();
 
-export function MisterioSchemaDiagram() {
+export function MisterioSchemaDiagram({ compact = false }: { compact?: boolean }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/80">
-      <h3 className="text-base font-bold text-slate-900 dark:text-white">
-        Diagrama de la base de datos (ERD)
-      </h3>
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-        Vista general de las tablas del caso y cómo se relacionan. La tabla central es{' '}
-        <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">persona</code>: casi todas
-        las pistas pasan por ahí.
-      </p>
+    <div className={compact ? '' : 'rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/80'}>
+      {!compact ? (
+        <>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">
+            Diagrama de la base de datos (ERD)
+          </h3>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Vista general de las tablas del caso y cómo se relacionan. La tabla central es{' '}
+            <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">persona</code>: casi todas
+            las pistas pasan por ahí.
+          </p>
+        </>
+      ) : null}
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-slate-50/50 p-2 dark:border-slate-700 dark:bg-slate-950/40">
+      <div
+        className={`overflow-x-auto rounded-xl border border-slate-200 bg-slate-50/50 p-2 dark:border-slate-700 dark:bg-slate-950/40 ${
+          compact ? '' : 'mt-4'
+        }`}
+      >
         <svg
           viewBox="0 0 1000 520"
           className="mx-auto min-w-[720px] max-w-full"
@@ -366,6 +374,6 @@ export function MisterioSchemaDiagram() {
           Relación entre tablas
         </span>
       </div>
-    </section>
+    </div>
   );
 }

@@ -6,7 +6,7 @@ import {
 } from './misterio.config';
 
 describe('misterio.config', () => {
-  it('usa el modo experto como único modo de juego', () => {
+  it('expone el identificador del juego de misterio', () => {
     expect(getMisterioGameMode()).toBe('experto');
     expect(MISTERIO_EXPERTO_ID).toBe('juego-misterio-experto');
   });

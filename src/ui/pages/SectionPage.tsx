@@ -57,7 +57,7 @@ export function SectionPage({ sectionId, topics, activeSubNavId }: SectionPagePr
             </Suspense>
           ) : sectionId === 'juegos' ? (
             <Suspense fallback={<RouteLoader />}>
-              <MisterioGamePanel activeSubNavId={activeSubNavId} />
+              <MisterioGamePanel />
             </Suspense>
           ) : visibleTopics.length > 0 ? (
             visibleTopics.map((topic) => <TopicCard key={topic.id} topic={topic} />)
