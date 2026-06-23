@@ -57,7 +57,7 @@ function OptionalQueries({
 }
 
 export function MisterioGamePanel(_props: MisterioGamePanelProps) {
-  const [sql, setSql] = useState(MISTERIO_QUICK_START.sql);
+  const [sql, setSql] = useState<string>(MISTERIO_QUICK_START.sql);
   const [executing, setExecuting] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
   const [result, setResult] = useState<MisterioExecutionResult | null>(null);
