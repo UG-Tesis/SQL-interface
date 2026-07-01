@@ -1,5 +1,4 @@
-import type { IslandActionResult } from '../../domain/models/IslandActionResult';
-import type { IslandPort } from '../../domain/ports/IslandPort';
+import type { IslandActionResult } from '../models/IslandActionResult';
 
 export interface IslandRestartResult {
   success: true;
