@@ -74,6 +74,13 @@ const TOPICS: Topic[] = [
     description: 'Investiga libremente con guía de inicio y mapa de tablas.',
     content: '',
   },
+  {
+    id: 'juego-sql-island',
+    sectionId: 'juegos',
+    title: 'SQL Island',
+    description: 'Aventura guiada por misiones para escapar de la isla con SQL.',
+    content: '',
+  },
 ];
 
 export class InMemoryTopicAdapter implements TopicPort {
