@@ -77,8 +77,8 @@ const TOPICS: Topic[] = [
   {
     id: 'juego-sql-island',
     sectionId: 'juegos',
-    title: 'SQL Island',
-    description: 'Aventura guiada por misiones para escapar de la isla con SQL.',
+    title: 'Escapa de la Isla',
+    description: 'Aventura por misiones: usa SQL para sobrevivir y huir de una isla desierta.',
     content: '',
   },
 ];

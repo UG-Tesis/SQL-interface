@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   getIslandMissionIndexForStep,
   getIslandHintForStep,
+  getIslandSqlTemplateForStep,
   getIslandSqlTaskForStep,
   ISLAND_AUTO_STEPS,
   ISLAND_AUTO_STEP_PROMPTS,
@@ -256,18 +257,22 @@ export function IslandGamePanel() {
     return getIslandSqlTaskForStep(stepIndex);
   }, [preSqlDialogueDone, stepIndex]);
   const sqlPlaceholder = useMemo(() => {
-    if (!sqlTask) return 'SELECT ...  ← escribe tu consulta aquí';
+    const template = getIslandSqlTemplateForStep(stepIndex);
+    if (template) {
+      return template;
+    }
+    if (!sqlTask) return 'SELECT ___ FROM ___;';
     switch (sqlTask.kind) {
       case 'INSERT':
-        return 'INSERT INTO ...  ← escribe tu sentencia aquí';
+        return 'INSERT INTO ___ (___) VALUES (___);';
       case 'UPDATE':
-        return 'UPDATE ... SET ...  ← escribe tu sentencia aquí';
+        return 'UPDATE ___ SET ___ = ___ WHERE ___;';
       case 'DELETE':
-        return 'DELETE FROM ...  ← escribe tu sentencia aquí';
+        return 'DELETE FROM ___ WHERE ___;';
       default:
-        return 'SELECT ... FROM ...  ← escribe tu consulta aquí';
+        return 'SELECT ___ FROM ___ WHERE ___;';
     }
-  }, [sqlTask]);
+  }, [sqlTask, stepIndex]);
 
   useEffect(() => {
     setStepFailureCount(0);
@@ -589,51 +594,47 @@ export function IslandGamePanel() {
       <FadeInUp delayMs={40} className="w-full shrink-0">
         <section className="relative overflow-hidden rounded-xl border border-amber-200/80 bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 p-[1px] shadow-md shadow-amber-200/50 dark:border-amber-700/40 dark:from-amber-500 dark:via-orange-500 dark:to-rose-500 dark:shadow-orange-500/20">
           <div className="rounded-[calc(0.75rem-1px)] bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 px-3 py-2 sm:px-4 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2.5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <div className="flex shrink-0 items-center gap-2.5">
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-teal-600 text-lg shadow-md shadow-cyan-500/25 dark:shadow-cyan-500/30">
                   🏝️
                 </span>
-                <div>
-                  <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-700/90 dark:text-amber-400/90">
-                    SQL Island · tesis_island
-                  </p>
-                  <h2 className="text-base font-bold text-slate-900 sm:text-lg dark:text-white">
-                    Escapa de la isla
-                  </h2>
-                </div>
+                <h2 className="text-base font-bold text-slate-900 sm:text-lg dark:text-white">
+                  Escapa de la isla
+                </h2>
               </div>
+
+              <div className="flex min-w-0 flex-1 justify-center gap-1 overflow-x-auto pb-0.5 sm:px-2">
+                {ISLAND_MISSIONS_UI.map((mission, index) => {
+                  const done = gameComplete || index < missionIndex;
+                  const active = index === missionIndex && !gameComplete;
+                  return (
+                    <div
+                      key={mission.id}
+                      className={`shrink-0 rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition ${
+                        active
+                          ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30 dark:bg-amber-400 dark:text-slate-900 dark:shadow-amber-400/30'
+                          : done
+                            ? 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300/80 dark:bg-emerald-500/20 dark:text-emerald-300 dark:ring-emerald-500/40'
+                            : 'bg-white/70 text-slate-500 ring-1 ring-amber-200/80 dark:bg-white/5 dark:text-slate-400 dark:ring-transparent'
+                      }`}
+                      title={mission.summary}
+                    >
+                      {done && !active ? '✓ ' : ''}
+                      M{mission.id}
+                    </div>
+                  );
+                })}
+              </div>
+
               <button
                 type="button"
                 onClick={() => void bootstrap({ resetExisting: true })}
                 disabled={executing}
-                className="rounded-lg border border-amber-300/80 bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-700 backdrop-blur transition hover:bg-white disabled:opacity-60 sm:text-sm dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                className="shrink-0 self-end rounded-lg border border-amber-300/80 bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-700 backdrop-blur transition hover:bg-white disabled:opacity-60 sm:self-auto sm:text-sm dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
               >
                 Reiniciar partida
               </button>
-            </div>
-
-            <div className="mt-2 flex gap-1 overflow-x-auto pb-0.5">
-              {ISLAND_MISSIONS_UI.map((mission, index) => {
-                const done = gameComplete || index < missionIndex;
-                const active = index === missionIndex && !gameComplete;
-                return (
-                  <div
-                    key={mission.id}
-                    className={`shrink-0 rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition ${
-                      active
-                        ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30 dark:bg-amber-400 dark:text-slate-900 dark:shadow-amber-400/30'
-                        : done
-                          ? 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300/80 dark:bg-emerald-500/20 dark:text-emerald-300 dark:ring-emerald-500/40'
-                          : 'bg-white/70 text-slate-500 ring-1 ring-amber-200/80 dark:bg-white/5 dark:text-slate-400 dark:ring-transparent'
-                    }`}
-                    title={mission.summary}
-                  >
-                    {done && !active ? '✓ ' : ''}
-                    M{mission.id}
-                  </div>
-                );
-              })}
             </div>
           </div>
         </section>
@@ -781,8 +782,8 @@ export function IslandGamePanel() {
                         )}
                       </div>
                       {stepHint ? (
-                        <p className="mt-2 rounded-lg border border-cyan-700/50 bg-cyan-950/40 px-2.5 py-2 text-xs leading-relaxed text-cyan-100">
-                          <span className="font-bold">Pista: </span>
+                        <p className="mt-2 whitespace-pre-line rounded-lg border border-cyan-700/50 bg-cyan-950/40 px-2.5 py-2 font-mono text-xs leading-relaxed text-cyan-100">
+                          <span className="font-sans font-bold">Pista: </span>
                           {stepHint}
                         </p>
                       ) : null}
@@ -817,7 +818,7 @@ export function IslandGamePanel() {
                         )}
                         {stepFailureCount > 0 && !stepHint && attemptsUntilHint > 0 ? (
                           <p className="mt-0.5 text-[11px] text-amber-400">
-                            Pista disponible en {attemptsUntilHint}{' '}
+                            Solución completa disponible en {attemptsUntilHint}{' '}
                             {attemptsUntilHint === 1 ? 'intento' : 'intentos'} más.
                           </p>
                         ) : null}

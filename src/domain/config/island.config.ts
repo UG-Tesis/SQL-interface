@@ -157,48 +157,92 @@ export function getIslandSqlTaskForStep(stepIndex: number): IslandSqlTask | null
 /** Tras cuántos intentos fallidos se muestra la pista automática */
 export const ISLAND_HINT_AFTER_FAILURES = 3;
 
-/** Pistas escalonadas por paso (null = paso automático o sin pista) */
-export const ISLAND_STEP_HINTS: (string | null)[] = [
+function formatIslandExpectedHint(solution: string): string {
+  const trimmed = solution.trim();
+  const withSemicolon = trimmed.endsWith(';') ? trimmed : `${trimmed};`;
+  return `Consulta esperada:\n${withSemicolon}`;
+}
+
+/** Plantilla abstracta para el placeholder del editor. */
+export function solutionToSqlTemplate(solution: string): string {
+  const keywords = new Set([
+    'select', 'from', 'where', 'and', 'or', 'not', 'like', 'is', 'null',
+    'insert', 'into', 'values', 'update', 'set', 'delete', 'order', 'by',
+    'group', 'asc', 'desc', 'inner', 'join', 'on', 'as', 'count', 'sum',
+    'avg', 'max', 'min', 'distinct', 'between', 'in', 'limit', 'having',
+  ]);
+
+  let sql = solution.trim().replace(/\s+/g, ' ');
+  sql = sql.replace(/'(?:''|[^'])*'/g, "'___'");
+  sql = sql.replace(/\b\d+\b/g, '___');
+  sql = sql.replace(
+    /\b[a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*\b|\*/g,
+    (token) => {
+      if (token === '*') return '___';
+      const parts = token.split('.');
+      if (parts.every((part) => keywords.has(part.toLowerCase()))) return token;
+      if (parts.length === 1 && keywords.has(token.toLowerCase())) return token;
+      return '___';
+    },
+  );
+  sql = sql.replace(/\s+/g, ' ').trim();
+  return sql.endsWith(';') ? sql : `${sql};`;
+}
+
+/**
+ * Solución oficial por paso (null = paso automático sin SQL del jugador).
+ * Debe coincidir con island-missions.data.ts en el backend.
+ */
+export const ISLAND_STEP_SOLUTIONS: (string | null)[] = [
   null,
-  'Usa SELECT * FROM habitante para ver toda la tabla.',
-  "Filtra con WHERE profesion = 'Carnicero'.",
-  "Filtra con WHERE estado = 'amigable'.",
-  "Combina profesion = 'Armero' AND estado = 'amigable'.",
-  "Prueba profesion LIKE '%herrero' AND estado = 'amigable'.",
+  'SELECT * FROM habitante',
+  "SELECT * FROM habitante WHERE profesion = 'Carnicero'",
+  "SELECT * FROM habitante WHERE estado = 'amigable'",
+  "SELECT * FROM habitante WHERE profesion = 'Armero' AND estado = 'amigable'",
+  "SELECT * FROM habitante WHERE profesion LIKE '%herrero' AND estado = 'amigable'",
   null,
-  "SELECT habitante_id FROM habitante WHERE nombre = 'Extranjero'.",
-  "SELECT oro FROM habitante WHERE nombre = 'Extranjero'.",
-  'Usa WHERE propietario IS NULL en la tabla objeto.',
+  "SELECT habitante_id FROM habitante WHERE nombre = 'Extranjero'",
+  "SELECT oro FROM habitante WHERE nombre = 'Extranjero'",
+  'SELECT * FROM objeto WHERE propietario IS NULL',
   null,
-  'UPDATE objeto SET propietario = 20 WHERE propietario IS NULL.',
-  'SELECT * FROM objeto WHERE propietario = 20.',
-  "Usa paréntesis: (profesion = 'Mercader' OR profesion = 'Comerciante') AND estado = 'amigable'.",
-  "UPDATE objeto SET propietario = 15 WHERE nombre = 'Tetera' OR nombre = 'Anillo'.",
+  'UPDATE objeto SET propietario = 20 WHERE propietario IS NULL',
+  'SELECT * FROM objeto WHERE propietario = 20',
+  "SELECT * FROM habitante WHERE (profesion = 'Mercader' OR profesion = 'Comerciante') AND estado = 'amigable'",
+  "UPDATE objeto SET propietario = 15 WHERE nombre = 'Tetera' OR nombre = 'Anillo'",
   null,
-  "UPDATE habitante SET nombre = 'Pedro' WHERE habitante_id = 20.",
-  "SELECT * FROM habitante WHERE profesion = 'Panadero' ORDER BY oro DESC.",
+  "UPDATE habitante SET nombre = 'Pedro' WHERE habitante_id = 20",
+  "SELECT * FROM habitante WHERE profesion = 'Panadero' ORDER BY oro DESC",
   null,
   null,
   null,
-  "SELECT * FROM habitante WHERE profesion = 'Piloto'.",
+  "SELECT * FROM habitante WHERE profesion = 'Piloto'",
   null,
-  "Une pueblo.jefe con habitante.habitante_id; filtra pueblo.nombre = 'Villa Cebolla'.",
+  "SELECT habitante.nombre FROM pueblo, habitante WHERE pueblo.jefe = habitante.habitante_id AND pueblo.nombre = 'Villa Cebolla'",
   null,
-  "COUNT(*) con JOIN a pueblo, Villa Cebolla y genero = 'f'.",
-  "SELECT habitante.nombre con JOIN, Villa Cebolla y genero = 'f'.",
+  "SELECT COUNT(*) FROM habitante, pueblo WHERE pueblo.pueblo_id = habitante.pueblo_id AND pueblo.nombre = 'Villa Cebolla' AND habitante.genero = 'f'",
+  "SELECT habitante.nombre FROM habitante, pueblo WHERE pueblo.pueblo_id = habitante.pueblo_id AND pueblo.nombre = 'Villa Cebolla' AND habitante.genero = 'f'",
   null,
-  "SUM(habitante.oro) con OR para Mercader, Comerciante y Panadero.",
+  "SELECT SUM(habitante.oro) FROM habitante WHERE profesion = 'Mercader' OR profesion = 'Comerciante' OR profesion = 'Panadero'",
   null,
-  'SELECT estado, AVG(habitante.oro) FROM habitante GROUP BY estado.',
+  'SELECT estado, AVG(habitante.oro) FROM habitante GROUP BY estado',
   null,
-  "DELETE FROM habitante WHERE nombre = 'Dorotea Sucia'.",
-  "UPDATE habitante SET estado = 'amigable' WHERE profesion = 'Piloto'.",
-  "UPDATE habitante SET estado = 'emigrado' WHERE habitante_id = 20.",
+  "DELETE FROM habitante WHERE nombre = 'Dorotea Sucia'",
+  "UPDATE habitante SET estado = 'amigable' WHERE profesion = 'Piloto'",
+  "UPDATE habitante SET estado = 'emigrado' WHERE habitante_id = 20",
 ];
 
 export function getIslandHintForStep(stepIndex: number): string | null {
   if (ISLAND_AUTO_STEPS.has(stepIndex)) return null;
-  return ISLAND_STEP_HINTS[stepIndex] ?? null;
+  const solution = ISLAND_STEP_SOLUTIONS[stepIndex];
+  if (!solution) return null;
+  return formatIslandExpectedHint(solution);
+}
+
+export function getIslandSqlTemplateForStep(stepIndex: number): string | null {
+  if (ISLAND_AUTO_STEPS.has(stepIndex)) return null;
+  const solution = ISLAND_STEP_SOLUTIONS[stepIndex];
+  if (!solution) return null;
+  return solutionToSqlTemplate(solution);
 }
 
 const MISSION_STEP_BOUNDARIES = [4, 6, 13, 21, 27, 31, 33, 35];
