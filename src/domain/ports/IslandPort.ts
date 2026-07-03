@@ -6,8 +6,14 @@ export interface IslandRestartResult {
   sessionId: string;
 }
 
+export interface IslandResumeResult {
+  success: true;
+  sessionId: string;
+}
+
 export interface IslandPort {
   restart(sessionId?: string): Promise<IslandRestartResult>;
+  resume(sessionId: string): Promise<IslandResumeResult>;
   closeSession(sessionId: string): Promise<{ success: true; message: string }>;
   continue(sessionId: string, stepIndex: number): Promise<IslandActionResult>;
   executeSql(

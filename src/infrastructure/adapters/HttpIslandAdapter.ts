@@ -1,5 +1,9 @@
 import type { IslandActionResult } from '../../domain/models/IslandActionResult';
-import type { IslandPort, IslandRestartResult } from '../../domain/ports/IslandPort';
+import type {
+  IslandPort,
+  IslandRestartResult,
+  IslandResumeResult,
+} from '../../domain/ports/IslandPort';
 import { apiRequest } from '../api/apiClient';
 
 export class HttpIslandAdapter implements IslandPort {
@@ -7,6 +11,13 @@ export class HttpIslandAdapter implements IslandPort {
     return apiRequest<IslandRestartResult>('/island/restart', {
       method: 'POST',
       body: JSON.stringify(sessionId ? { sessionId } : {}),
+    });
+  }
+
+  resume(sessionId: string): Promise<IslandResumeResult> {
+    return apiRequest<IslandResumeResult>('/island/session/resume', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId }),
     });
   }
 

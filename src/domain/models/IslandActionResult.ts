@@ -19,7 +19,8 @@ export interface IslandActionResult extends SqlExecutionResult {
   answer?: string;
   followUp?: string;
   hint?: string;
-  demoSql?: string;
+  demoSql?: string | string[];
+  failureCount?: number;
   progress: IslandMissionProgress | null;
   nextStepIndex: number | null;
 }
