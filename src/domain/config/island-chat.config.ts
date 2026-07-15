@@ -62,7 +62,7 @@ export const ISLAND_STEP_FOLLOW_UPS: (string | null)[] = [
   null,
   null,
   null,
-  '¡Oye, no me llames Forastero! Bueno… ¿cuál es mi habitante_id?',
+  '¡Oye, no me llames Extranjero! Bueno… ¿cuál es mi habitante_id?',
   null,
   '¡Maldición! Sin monedas, sin diversión. Debe haber otra forma de ganar oro sin ir a trabajar todavía. ¡Quizá pueda recoger objetos sin dueño y venderlos!',
   'Voy a recogerla.',
@@ -182,7 +182,7 @@ export const ISLAND_STEP_FOLLOW_UP_SPEAKERS: (IslandChatSpeaker | null)[] = [
   null,
   null,
   null,
-  { side: 'player' }, // 6 no me llames Forastero
+  { side: 'player' }, // 6 no me llames Extranjero
   null,
   { side: 'player' }, // 8 sin monedas
   { side: 'player' }, // 9 voy a recogerla

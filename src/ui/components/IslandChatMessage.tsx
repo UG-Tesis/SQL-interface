@@ -18,17 +18,20 @@ export function IslandChatMessage({ message }: IslandChatMessageProps) {
   const isPlayer = message.side === 'player';
   const label = isPlayer ? 'Tú' : message.speakerName ?? 'Isla';
   const completedRef = useRef(false);
+  const { animate, id, onAnimateComplete, text } = message;
 
   const fireComplete = () => {
-    if (completedRef.current || !message.onAnimateComplete) return;
+    if (completedRef.current || !onAnimateComplete) return;
     completedRef.current = true;
-    message.onAnimateComplete();
+    onAnimateComplete();
   };
 
   useEffect(() => {
-    if (message.animate) return;
-    fireComplete();
-  }, [message.animate, message.id]);
+    if (animate) return;
+    if (completedRef.current || !onAnimateComplete) return;
+    completedRef.current = true;
+    onAnimateComplete();
+  }, [animate, id, onAnimateComplete]);
 
   return (
     <div
@@ -52,16 +55,16 @@ export function IslandChatMessage({ message }: IslandChatMessageProps) {
               : 'border border-amber-200/50 bg-white/80 text-slate-800 dark:border-amber-800/30 dark:bg-slate-900/50 dark:text-slate-100'
           }`}
         >
-          {message.animate ? (
+          {animate ? (
             <TypewriterText
-              key={message.id}
-              text={message.text}
+              key={id}
+              text={text}
               speed={18}
               sentencePauseMs={320}
               onComplete={fireComplete}
             />
           ) : (
-            <span className="font-medium">{message.text}</span>
+            <span className="font-medium">{text}</span>
           )}
         </div>
       </div>

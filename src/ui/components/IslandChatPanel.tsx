@@ -16,13 +16,15 @@ export function IslandChatPanel({
 }: IslandChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const lastMessageText = messages[messages.length - 1]?.text;
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     requestAnimationFrame(() => {
       el.scrollTop = el.scrollHeight;
     });
-  }, [messages.length, messages[messages.length - 1]?.text]);
+  }, [messages.length, lastMessageText]);
 
   return (
     <section

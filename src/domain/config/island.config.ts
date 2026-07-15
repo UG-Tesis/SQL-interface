@@ -32,7 +32,7 @@ export const ISLAND_STEP_NARRATIVES: string[] = [
   'Gracias Erich. Entonces debo averiguar qué habitantes son amigables.',
   'En algún momento necesitaré una espada. Busca un armero amigable que pueda forjarme una.',
   'Son pocos. Quizá haya más herreros amigables. Prueba profesion LIKE \'%herrero\'.',
-  'Hola forastero, soy Pablo, alcalde de Ciudad Mono. Te registraré como habitante.',
+  'Hola extranjero, soy Pablo, alcalde de Ciudad Mono. Te registraré como habitante.',
   '¿Cuál es mi habitante_id?',
   '¡Hola, Ernesto! ¿Cuánto cuesta una espada?',
   'Vi objetos sin dueño. Lista los objetos cuyo propietario sea NULL.',
