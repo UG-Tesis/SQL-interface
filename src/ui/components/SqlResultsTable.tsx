@@ -1,4 +1,5 @@
 import type { SqlColumnMeta } from '../../domain/models/SqlExecutionResult';
+import { translateSqlError } from '../../infrastructure/sql/translateSqlError';
 
 interface SqlResultsTableProps {
   columns: SqlColumnMeta[];
@@ -13,10 +14,12 @@ function formatCell(value: unknown): string {
 }
 
 export function SqlResultsTable({ columns, rows, message }: SqlResultsTableProps) {
+  const displayMessage = message ? translateSqlError(message) : undefined;
+
   if (rows.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-600 dark:border-slate-600 dark:bg-slate-900/40 dark:text-slate-300">
-        {message ?? 'La consulta no devolvió registros.'}
+        {displayMessage ?? 'La consulta no devolvió registros.'}
       </div>
     );
   }
@@ -56,9 +59,9 @@ export function SqlResultsTable({ columns, rows, message }: SqlResultsTableProps
           </tbody>
         </table>
       </div>
-      {message ? (
+      {displayMessage ? (
         <p className="border-t border-slate-200 bg-slate-50 px-4 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
-          {message}
+          {displayMessage}
         </p>
       ) : null}
     </div>

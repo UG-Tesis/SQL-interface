@@ -22,6 +22,7 @@ import type { IslandActionResult } from '../../domain/models/IslandActionResult'
 import type { SqlColumnMeta } from '../../domain/models/SqlExecutionResult';
 import { HttpIslandAdapter } from '../../infrastructure/adapters/HttpIslandAdapter';
 import { getApiErrorMessage } from '../../infrastructure/api/apiErrors';
+import { translateSqlError } from '../../infrastructure/sql/translateSqlError';
 import {
   clearStoredIslandProgress,
   clearStoredIslandStepIndex,
@@ -466,6 +467,7 @@ export function IslandGamePanel() {
         statement,
       );
       const failed = actionResult.code < 0 || !actionResult.stepComplete;
+      const resultMessage = translateSqlError(actionResult.message);
 
       appendHistory({
         sql: statement,
@@ -474,8 +476,8 @@ export function IslandGamePanel() {
         message:
           actionResult.rows.length > 0
             ? undefined
-            : actionResult.message,
-        feedback: failed ? actionResult.message : '¡Correcto!',
+            : resultMessage,
+        feedback: failed ? resultMessage : '¡Correcto!',
         success: !failed,
       });
 
@@ -492,7 +494,7 @@ export function IslandGamePanel() {
           revealStepHint(hintToShow);
         }
 
-        setQueryError(actionResult.message);
+        setQueryError(resultMessage);
         return;
       }
 
@@ -559,7 +561,7 @@ export function IslandGamePanel() {
             message:
               isLast && actionResult.rows.length > 0
                 ? undefined
-                : actionResult.message,
+                : translateSqlError(actionResult.message),
             feedback: 'Acción automática completada',
             success: true,
           });
