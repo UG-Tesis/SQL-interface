@@ -66,19 +66,19 @@ const TOPICS: Topic[] = [
     content:
       'Ejercicio: Selecciona los empleados cuyo salario sea mayor a 1500 y que pertenezcan al departamento "Ventas".',
   },
-  // Juegos — Misterio SQL
-  {
-    id: 'juego-misterio-experto',
-    sectionId: 'juegos',
-    title: 'Misterio SQL',
-    description: 'Investiga libremente con guía de inicio y mapa de tablas.',
-    content: '',
-  },
+  // Juegos
   {
     id: 'juego-sql-island',
     sectionId: 'juegos',
     title: 'Escapa de la Isla',
     description: 'Aventura por misiones: usa SQL para sobrevivir y huir de una isla desierta.',
+    content: '',
+  },
+  {
+    id: 'juego-misterio-experto',
+    sectionId: 'juegos',
+    title: 'Misterio SQL',
+    description: 'Investiga libremente con guía de inicio y mapa de tablas.',
     content: '',
   },
 ];
