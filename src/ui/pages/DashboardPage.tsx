@@ -29,12 +29,6 @@ export function DashboardPage({ sections, onNavigate, onNavigateToHome }: Dashbo
                 SQL
               </h1>
             </FadeInUp>
-            <FadeInUp delayMs={200}>
-              <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
-                Plataforma interactiva de aprendizaje de sentencias SQL para estudiantes de 5to semestre
-                universitario.
-              </p>
-            </FadeInUp>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:gap-7 md:grid-cols-3 md:gap-8">
