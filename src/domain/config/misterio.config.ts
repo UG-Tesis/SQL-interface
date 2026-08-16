@@ -98,8 +98,8 @@ export const MISTERIO_INVESTIGATION_PHASES = [
     etapa: 1,
     title: 'Encuentra al asesino',
     description:
-      'Usa el informe del crimen, identifica a los testigos, lee sus entrevistas y revisa quién estuvo en el gimnasio el 9 de enero de 2018.',
-    hint: 'Anabel vio al asesino en el gimnasio ese día.',
+      'Usa el informe del crimen, identifica a los dos testigos, lee ambas entrevistas y cruza gimnasio (9/01) con membresía 48Z, estado oro y placa H42W.',
+    hint: 'Anabel lo vio en el gimnasio el 9/01; el otro testigo (última casa de Northwestern Dr) da membresía 48Z, oro y placa H42W.',
   },
   {
     etapa: 2,
@@ -153,7 +153,7 @@ export const MISTERIO_INVESTIGATION_FLOW = [
     label: 'Entrevistas y registros',
     table: 'entrevista',
     description:
-      'Lee las declaraciones y cruza con el gimnasio (9/01/2018) u otras tablas según las pistas.',
+      'Lee ambas declaraciones. Anabel apunta al gimnasio (9/01/2018); el otro testigo da membresía, estado oro y placa.',
   },
   {
     step: 4,
